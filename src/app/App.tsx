@@ -541,17 +541,17 @@ function SceneScreen() {
   return (
     <div style={{ paddingTop: 24 }}>
       <div style={{ padding: "0 16px" }}>
-        <TopBar subtitle="Around you" title="Players & places" size={16} />
+        <TopBar subtitle="Around you" title="Players & places" />
       </div>
 
       {/* Sub-tab switcher */}
-      <div style={{ margin: "0 16px 14px", background: "#141414", borderRadius: 10, padding: 3, display: "flex" }}>
+      <div style={{ margin: "0 16px 16px", background: "#141414", borderRadius: 12, padding: 4, display: "flex" }}>
         {([["hotspots", "Hot Spots"], ["circle", "My Circle"]] as [AroundMeTab, string][]).map(([id, label]) => {
           const on = subTab === id;
           return (
             <button key={id} onClick={() => setSubTab(id)}
-              style={{ flex: 1, background: on ? "#1e1e1e" : "none", borderRadius: 8, padding: "6px 4px", fontSize: 11, fontWeight: on ? 500 : 400, color: on ? A : "#555", border: "none", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
-              {id === "hotspots" ? <Flame size={10} strokeWidth={1.5} /> : <Users size={10} strokeWidth={1.5} />}
+              style={{ flex: 1, background: on ? "#1e1e1e" : "none", borderRadius: 10, padding: "8px 4px", fontSize: 12, fontWeight: on ? 600 : 400, color: on ? A : "#555", border: "none", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              {id === "hotspots" ? <Flame size={13} strokeWidth={1.5} /> : <Users size={13} strokeWidth={1.5} />}
               {label}
             </button>
           );
@@ -561,8 +561,8 @@ function SceneScreen() {
       {/* ── Hot Spots ── */}
       {subTab === "hotspots" && (
         <>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 16px", marginBottom: 10 }}>
-            <span style={{ fontSize: 9, color: "#444", textTransform: "uppercase", letterSpacing: "0.08em" }}>Clubs near you · all time activity</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 16px", marginBottom: 12 }}>
+            <span style={{ fontSize: 11, color: MU, textTransform: "uppercase", letterSpacing: "0.1em" }}>Clubs near you · all time activity</span>
           </div>
           <div style={{ margin: "0 16px", background: "#111", borderRadius: 14, overflow: "hidden", border: "0.5px solid #1e1e1e" }}>
             {CLUBS_NEARBY.map((club, idx) => {
@@ -589,7 +589,7 @@ function SceneScreen() {
               );
             })}
           </div>
-          <div style={{ textAlign: "center", padding: "12px 0 4px", fontSize: 10, color: "#2a2a2a" }}>
+          <div style={{ textAlign: "center", padding: "14px 0 4px", fontSize: 11, color: "#444" }}>
             4 more clubs nearby ↓
           </div>
         </>
@@ -599,13 +599,13 @@ function SceneScreen() {
       {subTab === "circle" && (
         <>
           {/* Crossed paths header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 12px", marginBottom: 10 }}>
-            <span style={{ fontSize: 9, color: "#444", textTransform: "uppercase", letterSpacing: "0.08em" }}>Players you crossed paths with</span>
-            <span style={{ fontSize: 10, color: "#555" }}>See all</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 16px", marginBottom: 12 }}>
+            <span style={{ fontSize: 11, color: MU, textTransform: "uppercase", letterSpacing: "0.1em" }}>Players you crossed paths with</span>
+            <span style={{ fontSize: 11, color: "#555" }}>See all</span>
           </div>
 
           {/* Crossed paths carousel */}
-          <div style={{ display: "flex", gap: 8, paddingLeft: 12, paddingRight: 12, overflowX: "auto", scrollbarWidth: "none" } as React.CSSProperties}>
+          <div style={{ display: "flex", gap: 10, paddingLeft: 16, paddingRight: 16, overflowX: "auto", scrollbarWidth: "none" } as React.CSSProperties}>
             {suggestions.map(p => (
               <div key={p.initials} style={{ minWidth: 90, background: "#141414", border: "0.5px solid #1e1e1e", borderRadius: 12, padding: "10px 8px", textAlign: "center", position: "relative", flexShrink: 0 }}>
                 {/* Dismiss */}
@@ -634,10 +634,10 @@ function SceneScreen() {
           </div>
 
           {/* Divider */}
-          <div style={{ height: "0.5px", background: "#111", margin: "14px 12px 10px" }} />
+          <div style={{ height: "0.5px", background: "#1e1e1e", margin: "16px 16px 12px" }} />
 
           {/* Activity feed header */}
-          <div style={{ fontSize: 9, color: "#444", textTransform: "uppercase", letterSpacing: "0.08em", paddingLeft: 12, marginBottom: 8 }}>
+          <div style={{ fontSize: 11, color: MU, textTransform: "uppercase", letterSpacing: "0.1em", paddingLeft: 16, marginBottom: 10 }}>
             What your circle is up to
           </div>
 
@@ -645,7 +645,7 @@ function SceneScreen() {
             const isFollowing = following.has(item.initials);
             const isLast = idx === CIRCLE_FEED.length - 1;
             return (
-              <div key={item.initials} style={{ display: "flex", padding: 12, borderBottom: isLast ? "none" : "0.5px solid #0f0f0f", gap: 10 }}>
+              <div key={item.initials} style={{ display: "flex", padding: "12px 16px", borderBottom: isLast ? "none" : "0.5px solid #0f0f0f", gap: 10 }}>
                 {/* Avatar + DUPR */}
                 <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, width: 44 }}>
                   <div style={{ width: 36, height: 36, borderRadius: "50%", background: item.bgColor, border: "1.5px solid #0a0a0a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: item.textColor }}>
@@ -771,7 +771,7 @@ export default function App() {
           <motion.div initial={{ opacity: 0, scale: 0.75 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.75 }} transition={{ duration: 0.18 }}
             style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 999, background: A, borderRadius: 40, padding: "12px 28px", display: "flex", alignItems: "center", gap: 8, pointerEvents: "none" }}>
             <Check size={18} color="#000" strokeWidth={2.5} />
-            <span style={{ fontSize: 15, fontWeight: 600, color: "#000" }}>Joined!</span>
+            <span style={{ fontSize: 15, fontWeight: 600, color: "#000" }}>Shortlisted!</span>
           </motion.div>
         )}
       </AnimatePresence>
