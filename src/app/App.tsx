@@ -17,6 +17,51 @@ const BD = "#2a2a2a";
 const MU = "#666666";
 const ME = { dupr: 3.41, avatar: "AR" };
 
+/* ── Avatar photos ────────────────────────────────────────── */
+const AVATAR_PHOTOS: Record<string, string> = {
+  AR: "https://i.pravatar.cc/80?img=33",
+  SK: "https://i.pravatar.cc/80?img=5",
+  TM: "https://i.pravatar.cc/80?img=12",
+  JP: "https://i.pravatar.cc/80?img=18",
+  MT: "https://i.pravatar.cc/80?img=51",
+  CL: "https://i.pravatar.cc/80?img=59",
+  SB: "https://i.pravatar.cc/80?img=60",
+  PR: "https://i.pravatar.cc/80?img=25",
+  TN: "https://i.pravatar.cc/80?img=52",
+  DW: "https://i.pravatar.cc/80?img=53",
+  ML: "https://i.pravatar.cc/80?img=23",
+  LC: "https://i.pravatar.cc/80?img=35",
+  BP: "https://i.pravatar.cc/80?img=54",
+  AN: "https://i.pravatar.cc/80?img=9",
+  LN: "https://i.pravatar.cc/80?img=57",
+  RS: "https://i.pravatar.cc/80?img=20",
+  HO: "https://i.pravatar.cc/80?img=24",
+  NM: "https://i.pravatar.cc/80?img=56",
+  MR: "https://i.pravatar.cc/80?img=11",
+  JL: "https://i.pravatar.cc/80?img=13",
+  KP: "https://i.pravatar.cc/80?img=16",
+  TC: "https://i.pravatar.cc/80?img=14",
+  GG: "https://i.pravatar.cc/80?img=68",
+  JN: "https://i.pravatar.cc/80?img=7",
+  PL: "https://i.pravatar.cc/80?img=8",
+  MC: "https://i.pravatar.cc/80?img=26",
+  DT: "https://i.pravatar.cc/80?img=15",
+};
+
+function PhotoAvatar({ initials, size, fallbackBg = "#333", fallbackColor = "#fff", style = {} }: {
+  initials: string; size: number; fallbackBg?: string; fallbackColor?: string; style?: React.CSSProperties;
+}) {
+  const src = AVATAR_PHOTOS[initials];
+  return src ? (
+    <img src={src} alt={initials}
+      style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", ...style }} />
+  ) : (
+    <div style={{ width: size, height: size, borderRadius: "50%", background: fallbackBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.35, fontWeight: 600, color: fallbackColor, ...style }}>
+      {initials}
+    </div>
+  );
+}
+
 /* ── Types ─────────────────────────────────────────────────── */
 type Session     = { id: number; name: string; venue: string; court: string; time: string; format: string; totalSpots: number; filled: number; matchScore: number; gameQuality: number; waitMinutes: number; duprRange: { min: number; max: number; avg: number }; vibe: string; vibeExtra: string[]; players: { name: string; dupr: number; avatar: string; isFriend: boolean }[]; friendCount: number; };
 type ConcernId   = "friends" | "swiperight" | "wait" | "level" | "vibe";
@@ -59,9 +104,8 @@ function SwipeRightPanel() {
       <div style={{ display: "flex", alignItems: "center", marginBottom: 10 }}>
         <div style={{ display: "flex" }}>
           {SWIPE_AVATARS.map((a, i) => (
-            <div key={i} style={{ width: 30, height: 30, borderRadius: "50%", background: a.color, border: "2px solid #111", marginLeft: i > 0 ? -8 : 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 600, color: "#fff", position: "relative", zIndex: 6 - i }}>
-              {a.initials}
-            </div>
+            <PhotoAvatar key={i} initials={a.initials} size={30} fallbackBg={a.color}
+              style={{ border: "2px solid #111", marginLeft: i > 0 ? -8 : 0, position: "relative", zIndex: 6 - i }} />
           ))}
         </div>
         <span style={{ fontSize: 12, color: MU, marginLeft: 10 }}>+ 52 players</span>
@@ -126,9 +170,7 @@ function FriendsPanel({ s }: { s: Session }) {
         <div style={{ display: "flex", gap: 14 }}>
           {friends.map((p, i) => (
             <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", background: FRIEND_COLORS[i % FRIEND_COLORS.length], display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 600, color: "#fff" }}>
-                {p.avatar}
-              </div>
+              <PhotoAvatar initials={p.avatar} size={44} fallbackBg={FRIEND_COLORS[i % FRIEND_COLORS.length]} />
               <span style={{ fontSize: 10, color: "#aaa" }}>{p.name}</span>
               <span style={{ fontSize: 9, color: MU, fontFamily: "monospace" }}>{p.dupr}</span>
             </div>
@@ -172,9 +214,8 @@ function FriendsRow() {
       <div style={{ display: "flex", alignItems: "center" }}>
         <div style={{ display: "flex" }}>
           {FRIEND_AVATARS_ROW.map((a, i) => (
-            <div key={i} style={{ width: 32, height: 32, borderRadius: "50%", background: a.color, border: "2px solid #0a0a0a", marginLeft: i > 0 ? -6 : 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "#fff", position: "relative", zIndex: 3 - i }}>
-              {a.initials}
-            </div>
+            <PhotoAvatar key={i} initials={a.initials} size={32} fallbackBg={a.color}
+              style={{ border: "2px solid #0a0a0a", marginLeft: i > 0 ? -6 : 0, position: "relative", zIndex: 3 - i }} />
           ))}
         </div>
         <span style={{ fontSize: 12, color: MU, marginLeft: 10 }}>+ 9 others (3.2–3.6)</span>
@@ -192,11 +233,39 @@ const TILES: { id: ConcernId; icon: React.ReactNode; label: (s: Session) => stri
   { id: "vibe",       icon: <Flame    size={18} strokeWidth={1.5} />, label: s => s.vibe,                               sub: "Vibe"        },
 ];
 
+/* ── Auto-rotate hook ──────────────────────────────────────── */
+const TILE_ORDER: ConcernId[] = TILES.map(t => t.id);
+
+function useAutoRotate(active: ConcernId, setActive: (id: ConcernId) => void) {
+  const stopped = useRef(false);
+  const activeRef = useRef(active);
+  activeRef.current = active;
+
+  useEffect(() => {
+    if (stopped.current) return;
+    const timer = setInterval(() => {
+      if (stopped.current) return;
+      const idx = TILE_ORDER.indexOf(activeRef.current);
+      setActive(TILE_ORDER[(idx + 1) % TILE_ORDER.length]);
+    }, 3000);
+    return () => clearInterval(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleUserTap = (id: ConcernId) => {
+    stopped.current = true;
+    setActive(id);
+  };
+
+  return handleUserTap;
+}
+
 /* ── CardContent ───────────────────────────────────────────── */
-function CardContent({ s, active, setActive, carouselMode = false, isBestMatch = false }: {
+function CardContent({ s, active, setActive, carouselMode = false, isBestMatch = false, onRemove }: {
   s: Session; active: ConcernId; setActive: (id: ConcernId) => void;
-  carouselMode?: boolean; isBestMatch?: boolean;
+  carouselMode?: boolean; isBestMatch?: boolean; onRemove?: () => void;
 }) {
+  const handleUserTap = useAutoRotate(active, setActive);
   return (
     <div style={{ background: S, border: `1px solid ${BD}`, borderRadius: 20, padding: 16, overflow: "hidden", ...(carouselMode ? { flex: 1, display: "flex", flexDirection: "column" } as React.CSSProperties : {}) }}>
       {isBestMatch && (
@@ -226,7 +295,7 @@ function CardContent({ s, active, setActive, carouselMode = false, isBestMatch =
         {TILES.map(t => {
           const isActive = active === t.id;
           return (
-            <button key={t.id} onClick={() => setActive(t.id)} style={{ flex: 1, background: IN, border: `1px solid ${isActive ? A : BD}`, borderRadius: 12, padding: "10px 4px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, cursor: "pointer" }}>
+            <button key={t.id} onClick={() => handleUserTap(t.id)} style={{ flex: 1, background: IN, border: `1px solid ${isActive ? A : BD}`, borderRadius: 12, padding: "10px 4px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, cursor: "pointer" }}>
               <span style={{ color: A }}>{t.icon}</span>
               <span style={{ fontSize: 13, fontWeight: 600, color: "#fff", lineHeight: 1 }}>{t.label(s)}</span>
               <span style={{ fontSize: 10, color: MU, lineHeight: 1 }}>{t.sub}</span>
@@ -246,12 +315,20 @@ function CardContent({ s, active, setActive, carouselMode = false, isBestMatch =
       </div>
       {/* CTA */}
       {carouselMode ? (
-        <a href="https://reclub.co/m/3CUP8A" target="_blank" rel="noopener noreferrer"
-          style={{ marginTop: carouselMode ? "auto" : 12, paddingTop: 12, display: "block", textDecoration: "none" }}>
-          <div style={{ width: "100%", background: A, borderRadius: 14, padding: "12px 0", cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 600, color: "#1a0a00", textAlign: "center" }}>
-            Join on Reclub
-          </div>
-        </a>
+        <div style={{ marginTop: "auto", paddingTop: 12, display: "flex", gap: 8 }}>
+          <a href="https://reclub.co/m/3CUP8A" target="_blank" rel="noopener noreferrer"
+            style={{ flex: 1, textDecoration: "none" }}>
+            <div style={{ width: "100%", background: A, borderRadius: 14, padding: "12px 0", cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 600, color: "#1a0a00", textAlign: "center" }}>
+              Join on Reclub
+            </div>
+          </a>
+          {onRemove && (
+            <button onClick={onRemove}
+              style={{ width: "20%", flexShrink: 0, background: IN, border: `1px solid ${BD}`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <X size={16} color="#888" strokeWidth={2} />
+            </button>
+          )}
+        </div>
       ) : (
         <button style={{ marginTop: 12, width: "100%", background: A, border: "none", borderRadius: 14, padding: "14px 0", cursor: "pointer", fontFamily: "inherit" }}>
           <div style={{ fontSize: 15, fontWeight: 600, color: "#000" }}>Shortlist</div>
@@ -368,14 +445,14 @@ function SecondaryCard({ s }: { s: Session }) {
 /* ── Shared top bar ────────────────────────────────────────── */
 function TopBar({ subtitle, title, size = 20 }: { subtitle: string; title: string; size?: number }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-      <div>
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 11, color: MU, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 }}>{subtitle}</div>
         <div style={{ fontSize: size, fontWeight: 600, color: "#fff" }}>{title}</div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <PhotoAvatar initials={ME.avatar} size={34} fallbackBg={A} fallbackColor="#000" />
         <div style={{ background: IN, border: `1px solid ${BD}`, borderRadius: 20, padding: "4px 10px", fontSize: 13, fontWeight: 600, color: A }}>{ME.dupr}</div>
-        <div style={{ width: 34, height: 34, borderRadius: "50%", background: A, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, color: "#000" }}>{ME.avatar}</div>
       </div>
     </div>
   );
@@ -409,12 +486,12 @@ function BottomNav({ active, onSelect, savedCount }: { active: TabId; onSelect: 
 }
 
 /* ── Carousel card ─────────────────────────────────────────── */
-function CarouselCard({ s, isBestMatch }: { s: Session; isBestMatch?: boolean }) {
+function CarouselCard({ s, isBestMatch, onRemove }: { s: Session; isBestMatch?: boolean; onRemove?: () => void }) {
   const [active, setActive] = useState<ConcernId>("friends");
   return (
     <div style={{ minWidth: 280, width: "82vw", maxWidth: 350, flexShrink: 0, scrollSnapAlign: "start", display: "flex", flexDirection: "column" }}>
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        <CardContent s={s} active={active} setActive={setActive} carouselMode isBestMatch={isBestMatch} />
+        <CardContent s={s} active={active} setActive={setActive} carouselMode isBestMatch={isBestMatch} onRemove={onRemove} />
       </div>
     </div>
   );
@@ -424,12 +501,19 @@ function CarouselCard({ s, isBestMatch }: { s: Session; isBestMatch?: boolean })
 function SavedScreen({ sessions }: { sessions: Session[] }) {
   const [carouselIdx, setCarouselIdx] = useState(0);
   const [sort, setSort] = useState<"match" | "wait" | "friends">("match");
+  const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const visibleSessions = sessions.filter(s => !removedIds.has(s.id));
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
     const approxCard = scrollRef.current.offsetWidth * 0.82 + 10;
-    setCarouselIdx(Math.min(Math.round(scrollRef.current.scrollLeft / approxCard), sessions.length - 1));
+    setCarouselIdx(Math.min(Math.round(scrollRef.current.scrollLeft / approxCard), visibleSessions.length - 1));
+  };
+
+  const handleRemove = (id: number) => {
+    setRemovedIds(prev => new Set([...prev, id]));
   };
 
   const SORT_LABELS: Record<string, string> = { match: "Best match", wait: "Wait time", friends: "Friends" };
@@ -451,15 +535,15 @@ function SavedScreen({ sessions }: { sessions: Session[] }) {
       </div>
       <div ref={scrollRef} onScroll={handleScroll}
         style={{ display: "flex", gap: 10, paddingLeft: 12, paddingRight: 12, overflowX: "auto", scrollSnapType: "x mandatory", scrollbarWidth: "none", alignItems: "stretch" } as React.CSSProperties}>
-        {sessions.length > 0 ? sessions.map((sess, i) => (
-          <CarouselCard key={sess.id} s={sess} isBestMatch={i === 0} />
+        {visibleSessions.length > 0 ? visibleSessions.map((sess, i) => (
+          <CarouselCard key={sess.id} s={sess} isBestMatch={i === 0} onRemove={() => handleRemove(sess.id)} />
         )) : (
           <div style={{ padding: "48px 0", color: MU, fontSize: 13 }}>No saved sessions yet.</div>
         )}
       </div>
-      {sessions.length > 1 && (
+      {visibleSessions.length > 1 && (
         <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 16 }}>
-          {sessions.map((_, i) => (
+          {visibleSessions.map((_, i) => (
             <div key={i} style={{ height: 5, width: i === carouselIdx ? 12 : 5, borderRadius: 3, background: i === carouselIdx ? A : "#1e1e1e", transition: "all 0.2s" }} />
           ))}
         </div>
@@ -614,9 +698,8 @@ function SceneScreen() {
                   <X size={10} color="#333" strokeWidth={2} />
                 </button>
                 {/* Avatar */}
-                <div style={{ width: 40, height: 40, borderRadius: "50%", background: p.bgColor, border: "1.5px solid #0a0a0a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: p.textColor, margin: "0 auto 3px" }}>
-                  {p.initials}
-                </div>
+                <PhotoAvatar initials={p.initials} size={40} fallbackBg={p.bgColor} fallbackColor={p.textColor}
+                  style={{ border: "1.5px solid #0a0a0a", margin: "0 auto 3px" }} />
                 {/* DUPR */}
                 <div style={{ fontSize: 10, fontWeight: 500, color: A, marginBottom: 2 }}>{p.dupr}</div>
                 {/* Name */}
@@ -648,9 +731,8 @@ function SceneScreen() {
               <div key={item.initials} style={{ display: "flex", padding: "12px 16px", borderBottom: isLast ? "none" : "0.5px solid #0f0f0f", gap: 10 }}>
                 {/* Avatar + DUPR */}
                 <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, width: 44 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: item.bgColor, border: "1.5px solid #0a0a0a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: item.textColor }}>
-                    {item.initials}
-                  </div>
+                  <PhotoAvatar initials={item.initials} size={36} fallbackBg={item.bgColor} fallbackColor={item.textColor}
+                    style={{ border: "1.5px solid #0a0a0a" }} />
                   <span style={{ fontSize: 10, fontWeight: 500, color: A }}>{item.dupr}</span>
                 </div>
                 {/* Feed body */}
@@ -782,7 +864,7 @@ export default function App() {
         {/* ── SWIPE TAB ── */}
         {activeTab === "swipe" && (
           <div style={{ padding: "24px 16px 0" }}>
-            <TopBar subtitle="Tonight" title="Find your game" />
+            <TopBar subtitle="Exciting" title="Find your game" />
 
             {/* Filters */}
             <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
