@@ -6,7 +6,7 @@ import {
 import {
   ThumbsUp, Zap, Target, Users, Flame,
   Clock, MapPin, X, Check, RotateCcw, RefreshCw,
-  Bookmark, Layers,
+  Bookmark, Layers, Heart, Sparkles,
 } from "lucide-react";
 
 /* ── Tokens ────────────────────────────────────────────────── */
@@ -67,7 +67,7 @@ type Session     = { id: number; name: string; venue: string; court: string; tim
 type ConcernId   = "friends" | "swiperight" | "wait" | "level" | "vibe";
 type FilterId    = "all" | "fast" | "level" | "friends";
 type SwipeAction = "join" | "skip";
-type TabId       = "swipe" | "saved" | "scene";
+type TabId       = "swipe" | "saved" | "scene" | "test";
 type AroundMeTab = "hotspots" | "circle";
 
 /* ── Data ──────────────────────────────────────────────────── */
@@ -489,6 +489,7 @@ function BottomNav({ active, onSelect, savedCount }: { active: TabId; onSelect: 
     { id: "swipe", icon: <Layers   size={18} strokeWidth={1.5} />, label: "Swipe" },
     { id: "saved", icon: <Bookmark size={18} strokeWidth={1.5} />, label: "Saved", badge: savedCount },
     { id: "scene", icon: <MapPin   size={18} strokeWidth={1.5} />, label: "Around Me" },
+    { id: "test",  icon: <Sparkles size={18} strokeWidth={1.5} />, label: "Test" },
   ];
   return (
     <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, height: 64, background: "#0a0a0a", borderTop: "0.5px solid #1e1e1e", display: "flex", zIndex: 200 }}>
@@ -800,6 +801,291 @@ function SceneScreen() {
   );
 }
 
+/* ── Test Screen — Premium Emotional UI ────────────────────── */
+type TestFilterId = "foryou" | "competitive" | "friends";
+
+const TEST_FILTERS: { id: TestFilterId; label: string }[] = [
+  { id: "foryou", label: "For You" },
+  { id: "competitive", label: "Competitive" },
+  { id: "friends", label: "Friends" },
+];
+
+function MatchRing({ pct }: { pct: number }) {
+  const r = 28, c = 2 * Math.PI * r, dash = (pct / 100) * c;
+  return (
+    <div style={{ position: "relative", width: 72, height: 72, flexShrink: 0 }}>
+      <svg width={72} height={72} viewBox="0 0 72 72" style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={36} cy={36} r={r} fill="none" stroke="rgba(245,166,35,0.12)" strokeWidth={4} />
+        <circle cx={36} cy={36} r={r} fill="none" stroke={A} strokeWidth={4}
+          strokeDasharray={`${dash} ${c - dash}`} strokeLinecap="round" />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontSize: 18, fontWeight: 700, color: "#fff", lineHeight: 1 }}>{pct}%</span>
+        <span style={{ fontSize: 8, color: "rgba(255,255,255,0.45)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 2 }}>match</span>
+      </div>
+    </div>
+  );
+}
+
+function TestCardContent({ s }: { s: Session }) {
+  const friends = s.players.filter(p => p.isFriend);
+  const topPlayers = s.players.filter(p => !p.isFriend).slice(0, 2);
+  const friendLine = friends.length > 0
+    ? `${friends[0].name}${friends.length > 1 ? ` +${friends.length - 1} friend${friends.length > 1 ? "s" : ""}` : ""} joining`
+    : `${s.filled} players joining`;
+
+  const vibeTags: { emoji: string; label: string }[] = [];
+  if (s.matchScore >= 80) vibeTags.push({ emoji: "🔥", label: "Popular" });
+  const inRange = ME.dupr >= s.duprRange.min && ME.dupr <= s.duprRange.max;
+  vibeTags.push({ emoji: "🎯", label: inRange ? "My Level" : "Competitive" });
+  if (s.vibe === "Social" || s.vibe === "Chill") vibeTags.push({ emoji: "🍻", label: "Social vibe" });
+  else vibeTags.push({ emoji: "⚡", label: "Intense" });
+
+  return (
+    <div style={{ position: "relative", borderRadius: 24, overflow: "hidden", height: "100%" }}>
+      {/* Background images with crossfade */}
+      <CardBgRotator />
+      {/* Gradient overlay — stronger at bottom */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(11,11,12,0.35) 0%, rgba(11,11,12,0.55) 30%, rgba(11,11,12,0.92) 65%, rgba(11,11,12,0.98) 100%)", zIndex: 1 }} />
+
+      {/* Content */}
+      <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "20px 20px 24px" }}>
+
+        {/* Top row pills */}
+        <div style={{ position: "absolute", top: 16, left: 20, right: 20, display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ background: "rgba(245,166,35,0.18)", backdropFilter: "blur(12px)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 600, color: A }}>
+            Tonight
+          </span>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
+            <Clock size={10} strokeWidth={1.5} style={{ display: "inline", verticalAlign: "-1px", marginRight: 4 }} />
+            {s.time}
+          </span>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
+            <MapPin size={10} strokeWidth={1.5} style={{ display: "inline", verticalAlign: "-1px", marginRight: 4 }} />
+            {s.venue.replace(/\s*Courts?.*/, "").replace(/\s*Sports?.*/, "")}
+          </span>
+        </div>
+
+        {/* Title + Match ring */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 16 }}>
+          <div style={{ flex: 1, paddingRight: 16 }}>
+            <h2 style={{ fontSize: 26, fontWeight: 700, color: "#fff", lineHeight: 1.15, margin: "0 0 6px" }}>{s.name}</h2>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: 0 }}>{s.court}</p>
+          </div>
+          <MatchRing pct={s.matchScore} />
+        </div>
+
+        {/* Social proof — merged avatars */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+          <div style={{ display: "flex" }}>
+            {friends.slice(0, 2).map((p, i) => (
+              <PhotoAvatar key={p.avatar} initials={p.avatar} size={32} fallbackBg="#333"
+                style={{ border: "2px solid #0B0B0C", marginLeft: i > 0 ? -10 : 0, position: "relative", zIndex: 4 - i }} />
+            ))}
+            {topPlayers.slice(0, 2).map((p, i) => (
+              <div key={p.avatar} style={{ marginLeft: -10, position: "relative", zIndex: 2 - i }}>
+                <PhotoAvatar initials={p.avatar} size={32} fallbackBg="#333"
+                  style={{ border: "2px solid #0B0B0C", boxShadow: `0 0 0 1.5px rgba(245,166,35,0.4)` }} />
+              </div>
+            ))}
+            <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "2px solid #0B0B0C", marginLeft: -10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.5)", position: "relative", zIndex: 0 }}>
+              +{Math.max(0, s.filled - friends.length - topPlayers.length)}
+            </div>
+          </div>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>{friendLine}</span>
+        </div>
+
+        {/* Tags */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+          {vibeTags.map((t, i) => (
+            <span key={i} style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: "5px 12px", fontSize: 11, color: "rgba(255,255,255,0.55)" }}>
+              {t.emoji} {t.label}
+            </span>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <button style={{ width: "100%", background: `linear-gradient(135deg, ${A}, #e09422)`, border: "none", borderRadius: 16, padding: "16px 0", cursor: "pointer", fontFamily: "inherit", fontSize: 16, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.02em", boxShadow: "0 4px 24px rgba(245,166,35,0.25)" }}>
+          I'm In
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function TestSwipeCard({ s, isExiting, exitDir, onAction, onExited }: {
+  s: Session; isExiting: boolean; exitDir: SwipeAction;
+  onAction: (a: SwipeAction) => void; onExited: () => void;
+}) {
+  const controls = useAnimation();
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-220, 0, 220], [-6, 0, 6]);
+  const joinOp = useTransform(x, [20, 90], [0, 1]);
+  const skipOp = useTransform(x, [-20, -90], [0, 1]);
+  const exitingRef = useRef(false);
+
+  useEffect(() => {
+    exitingRef.current = false; x.set(0);
+    controls.set({ opacity: 0.85, scale: 0.96, x: 0 });
+    controls.start({ opacity: 1, scale: 1, transition: { duration: 0.25, ease: "easeOut" } });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s.id]);
+
+  useEffect(() => {
+    if (!isExiting || exitingRef.current) return;
+    exitingRef.current = true;
+    const tx = exitDir === "join" ? 520 : -520;
+    controls.start({ x: tx, opacity: 0, transition: { duration: 0.38, ease: [0.4, 0, 0.2, 1] } }).then(onExited);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExiting]);
+
+  const handleDragEnd = (_: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
+    if (exitingRef.current) return;
+    const { offset, velocity } = info;
+    if (offset.x > 80 || velocity.x > 400) {
+      exitingRef.current = true; onAction("join");
+      controls.start({ x: 520, opacity: 0, transition: { duration: 0.32, ease: [0.4, 0, 0.2, 1] } }).then(onExited);
+    } else if (offset.x < -80 || velocity.x < -400) {
+      exitingRef.current = true; onAction("skip");
+      controls.start({ x: -520, opacity: 0, transition: { duration: 0.32, ease: [0.4, 0, 0.2, 1] } }).then(onExited);
+    } else {
+      controls.start({ x: 0, transition: { type: "spring", stiffness: 320, damping: 28 } });
+    }
+  };
+
+  return (
+    <motion.div animate={controls} style={{ x, rotate, position: "relative", touchAction: "pan-y", height: "100%" }}
+      drag={exitingRef.current ? false : "x"} dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.88} dragMomentum={false} onDragEnd={handleDragEnd} whileDrag={{ cursor: "grabbing" }}>
+      <motion.div style={{ position: "absolute", top: 60, right: 20, zIndex: 20, pointerEvents: "none", opacity: joinOp, background: "rgba(245,166,35,0.15)", border: `1.5px solid ${A}`, borderRadius: 12, padding: "6px 16px" }}>
+        <span style={{ color: A, fontSize: 14, fontWeight: 700 }}>I'M IN ✓</span>
+      </motion.div>
+      <motion.div style={{ position: "absolute", top: 60, left: 20, zIndex: 20, pointerEvents: "none", opacity: skipOp, background: "rgba(60,60,60,0.4)", border: "1.5px solid #444", borderRadius: 12, padding: "6px 16px" }}>
+        <span style={{ color: "#888", fontSize: 14, fontWeight: 700 }}>PASS ✕</span>
+      </motion.div>
+      <TestCardContent s={s} />
+    </motion.div>
+  );
+}
+
+function TestScreen() {
+  const [testFilter, setTestFilter] = useState<TestFilterId>("foryou");
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [history, setHistory] = useState<Array<{ idx: number; action: SwipeAction }>>([]);
+  const [isExiting, setIsExiting] = useState(false);
+  const [exitDir, setExitDir] = useState<SwipeAction>("join");
+
+  const deck = ALL_SESSIONS.filter(s => {
+    if (testFilter === "competitive") return s.vibe === "Intense" || s.duprRange.avg >= 3.5;
+    if (testFilter === "friends") return s.friendCount > 0;
+    return true;
+  });
+
+  const isDone = currentIdx >= deck.length;
+  const current = deck[currentIdx];
+  const canUndo = history.length > 0 && !isExiting;
+
+  const triggerExit = (action: SwipeAction) => {
+    if (isExiting) return;
+    setExitDir(action); setIsExiting(true);
+  };
+  const handleAction = (_action: SwipeAction) => {};
+  const handleExited = () => {
+    setHistory(prev => [...prev, { idx: currentIdx, action: exitDir }]);
+    setCurrentIdx(prev => prev + 1);
+    setIsExiting(false);
+  };
+  const handleUndo = () => {
+    if (!canUndo) return;
+    const last = history[history.length - 1];
+    setHistory(prev => prev.slice(0, -1));
+    setCurrentIdx(last.idx);
+  };
+  const handleReload = () => { setCurrentIdx(0); setHistory([]); setIsExiting(false); };
+
+  useEffect(() => { setCurrentIdx(0); setHistory([]); setIsExiting(false); }, [testFilter]);
+
+  return (
+    <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", height: "calc(100dvh - 64px)" }}>
+      {/* Header */}
+      <div style={{ padding: "16px 0 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1 style={{ fontSize: 26, fontWeight: 700, color: "#fff", margin: 0 }}>Find your game</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.2)", borderRadius: 20, padding: "4px 10px", fontSize: 12, fontWeight: 600, color: A }}>{ME.dupr}</div>
+          <PhotoAvatar initials={ME.avatar} size={34} fallbackBg={A} fallbackColor="#000" />
+        </div>
+      </div>
+
+      {/* Filter pills */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {TEST_FILTERS.map(f => {
+          const on = testFilter === f.id;
+          return (
+            <button key={f.id} onClick={() => setTestFilter(f.id)}
+              style={{ padding: "8px 18px", borderRadius: 24, fontSize: 13, fontWeight: on ? 600 : 400, cursor: "pointer", fontFamily: "inherit", border: "none",
+                background: on ? "rgba(245,166,35,0.15)" : "rgba(255,255,255,0.04)",
+                color: on ? A : "rgba(255,255,255,0.4)",
+                backdropFilter: "blur(12px)",
+                ...(on ? { boxShadow: `inset 0 0 0 1px rgba(245,166,35,0.3)` } : { boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)" }),
+              }}>
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Card area — fills remaining space */}
+      <div style={{ flex: 1, position: "relative", marginBottom: 12, minHeight: 0 }}>
+        {isDone ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 20 }}>
+            <div style={{ fontSize: 48 }}>🏓</div>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.35)", textAlign: "center", maxWidth: 220 }}>
+              {deck.length === 0 ? "No games match this filter." : "You've seen all games tonight."}
+            </p>
+            <button onClick={handleReload}
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `linear-gradient(135deg, ${A}, #e09422)`, border: "none", borderRadius: 14, padding: "12px 28px", fontSize: 14, fontWeight: 700, color: "#0B0B0C", cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 20px rgba(245,166,35,0.25)" }}>
+              <RefreshCw size={15} strokeWidth={2} /> Start over
+            </button>
+          </div>
+        ) : current && (
+          <>
+            {/* Card stack shadows */}
+            {deck[currentIdx + 2] && (
+              <motion.div animate={isExiting ? { opacity: 0.3 } : { opacity: 0.12 }} transition={{ duration: 0.3 }}
+                style={{ position: "absolute", top: 8, left: 12, right: 12, bottom: -4, background: "rgba(30,30,30,0.6)", borderRadius: 24, zIndex: 0, pointerEvents: "none" }} />
+            )}
+            {deck[currentIdx + 1] && (
+              <motion.div animate={isExiting ? { opacity: 0.6 } : { opacity: 0.25 }} transition={{ duration: 0.3 }}
+                style={{ position: "absolute", top: 4, left: 6, right: 6, bottom: -2, background: "rgba(30,30,30,0.8)", borderRadius: 24, zIndex: 1, pointerEvents: "none" }} />
+            )}
+            <div style={{ position: "relative", zIndex: 2, height: "100%" }}>
+              <TestSwipeCard s={current} isExiting={isExiting} exitDir={exitDir} onAction={handleAction} onExited={handleExited} />
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Action buttons */}
+      {!isDone && current && (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 24, paddingBottom: 12 }}>
+          <button onClick={() => triggerExit("skip")} disabled={isExiting}
+            style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.4 : 1, backdropFilter: "blur(8px)" }}>
+            <X size={22} color="rgba(255,255,255,0.45)" strokeWidth={2} />
+          </button>
+          <button onClick={handleUndo} disabled={!canUndo}
+            style={{ width: 42, height: 42, borderRadius: "50%", background: canUndo ? "rgba(255,255,255,0.04)" : "transparent", border: `1px solid ${canUndo ? "rgba(255,255,255,0.08)" : "transparent"}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: canUndo ? "pointer" : "default", opacity: canUndo ? 1 : 0.15, transition: "opacity 0.2s" }}>
+            <RotateCcw size={16} color="rgba(255,255,255,0.4)" strokeWidth={2} />
+          </button>
+          <button onClick={() => triggerExit("join")} disabled={isExiting}
+            style={{ width: 56, height: 56, borderRadius: "50%", background: `linear-gradient(135deg, ${A}, #e09422)`, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.5 : 1, boxShadow: "0 4px 20px rgba(245,166,35,0.3)" }}>
+            <Heart size={24} color="#0B0B0C" fill="#0B0B0C" strokeWidth={2} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Filter config ─────────────────────────────────────────── */
 const FILTERS: { id: FilterId; label: string; icon?: React.ReactNode }[] = [
   { id: "all",     label: "All" },
@@ -980,6 +1266,9 @@ export default function App() {
 
         {/* ── SCENE TAB ── */}
         {activeTab === "scene" && <SceneScreen />}
+
+        {/* ── TEST TAB ── */}
+        {activeTab === "test" && <TestScreen />}
 
       {/* Bottom nav */}
       <BottomNav active={activeTab} onSelect={setActiveTab} savedCount={savedCount} />
