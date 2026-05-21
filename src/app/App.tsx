@@ -167,12 +167,12 @@ function FriendsPanel({ s }: { s: Session }) {
         <span style={{ fontSize: 13, color: MU, paddingTop: 2 }}>{friends.length > 0 ? "contacts going tonight" : "no contacts going"}</span>
       </div>
       {friends.length > 0 ? (
-        <div style={{ display: "flex", gap: 14 }}>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-start" }}>
           {friends.map((p, i) => (
-            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-              <PhotoAvatar initials={p.avatar} size={44} fallbackBg={FRIEND_COLORS[i % FRIEND_COLORS.length]} />
+            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+              <PhotoAvatar initials={p.avatar} size={56} fallbackBg={FRIEND_COLORS[i % FRIEND_COLORS.length]}
+                style={{ border: `2px solid ${A}33` }} />
               <span style={{ fontSize: 10, color: "#aaa" }}>{p.name}</span>
-              <span style={{ fontSize: 9, color: MU, fontFamily: "monospace" }}>{p.dupr}</span>
             </div>
           ))}
         </div>
@@ -201,9 +201,9 @@ function VibePanel({ s }: { s: Session }) {
 
 /* ── Friends row ───────────────────────────────────────────── */
 const FRIEND_AVATARS_ROW = [
-  { initials: "SK", color: "#7C3AED" },
-  { initials: "TM", color: "#0D9488" },
-  { initials: "JP", color: "#BE185D" },
+  { initials: "PR", color: "#7C3AED" },
+  { initials: "DW", color: "#0D9488" },
+  { initials: "LC", color: "#BE185D" },
 ];
 function FriendsRow() {
   return (
@@ -797,6 +797,7 @@ export default function App() {
   const [isExiting,  setIsExiting]  = useState(false);
   const [exitDir,    setExitDir]    = useState<SwipeAction>("join");
   const [feedback,   setFeedback]   = useState<"joined" | null>(null);
+  const [savedCount, setSavedCount] = useState(0);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const deck = ALL_SESSIONS.filter(s => {
@@ -817,6 +818,7 @@ export default function App() {
   const showJoinedPill = () => {
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     setFeedback("joined");
+    setSavedCount(prev => prev + 1);
     feedbackTimer.current = setTimeout(() => setFeedback(null), 1500);
   };
 
@@ -848,7 +850,7 @@ export default function App() {
   return (
     <div style={{ minHeight: "100dvh", background: "#050505", fontFamily: "Inter, sans-serif", display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
       {/* Mobile shell */}
-      <div id="mobile-shell" style={{ position: "relative", width: "100%", maxWidth: 430, minHeight: "100dvh", background: "#0a0a0a", overflow: "hidden" }}>
+      <div id="mobile-shell" style={{ position: "relative", width: "100%", maxWidth: 430, height: "100dvh", background: "#0a0a0a", overflowY: "auto", overflowX: "hidden", paddingBottom: 130 }}>
       {/* Feedback pill */}
       <AnimatePresence>
         {feedback === "joined" && (
@@ -859,9 +861,6 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Scroll area */}
-      <div style={{ maxWidth: 430, margin: "0 auto", overflowY: "auto", paddingBottom: 130 }}>
 
         {/* ── SWIPE TAB ── */}
         {activeTab === "swipe" && (
@@ -886,7 +885,7 @@ export default function App() {
               <>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                   <span style={{ fontSize: 10, color: "#555" }}>Card {currentCardN} of {totalCards}</span>
-                  <span style={{ fontSize: 10, color: A, fontWeight: 500 }}>{SAVED_IDS.length} saved</span>
+                  <span style={{ fontSize: 10, color: A, fontWeight: 500 }}>{savedCount} saved</span>
                 </div>
                 <div style={{ height: 3, background: "#1a1a1a", borderRadius: 2, marginBottom: 16 }}>
                   <div style={{ width: `${progressPct}%`, height: "100%", background: A, borderRadius: 2, transition: "width 0.3s" }} />
@@ -958,20 +957,9 @@ export default function App() {
 
         {/* ── SCENE TAB ── */}
         {activeTab === "scene" && <SceneScreen />}
-      </div>
-
-      {/* Floating pill — swipe tab only */}
-      {activeTab === "swipe" && SAVED_IDS.length > 0 && (
-        <div style={{ position: "fixed", bottom: 64 + 10, left: "50%", transform: "translateX(-50%)", zIndex: 150, maxWidth: 430 }}>
-          <button onClick={() => setActiveTab("saved")} style={{ display: "flex", alignItems: "center", gap: 8, background: "#1a1a1a", border: `0.5px solid ${A}`, borderRadius: 20, padding: "6px 16px", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
-            <div style={{ width: 5, height: 5, borderRadius: "50%", background: A, flexShrink: 0 }} />
-            <span style={{ fontSize: 10, color: A, fontWeight: 500 }}>{SAVED_IDS.length} saved · tap to review</span>
-          </button>
-        </div>
-      )}
 
       {/* Bottom nav */}
-      <BottomNav active={activeTab} onSelect={setActiveTab} savedCount={SAVED_IDS.length} />
+      <BottomNav active={activeTab} onSelect={setActiveTab} savedCount={savedCount} />
       </div>{/* end mobile-shell */}
     </div>
   );
