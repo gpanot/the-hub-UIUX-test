@@ -442,17 +442,19 @@ function SecondaryCard({ s }: { s: Session }) {
   );
 }
 
-/* ── Shared top bar ────────────────────────────────────────── */
+/* ── Shared top bar (sticky) ───────────────────────────────── */
 function TopBar({ subtitle, title, size = 20 }: { subtitle: string; title: string; size?: number }) {
   return (
-    <div style={{ marginBottom: 20 }}>
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 11, color: MU, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 }}>{subtitle}</div>
-        <div style={{ fontSize: size, fontWeight: 600, color: "#fff" }}>{title}</div>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <PhotoAvatar initials={ME.avatar} size={34} fallbackBg={A} fallbackColor="#000" />
-        <div style={{ background: IN, border: `1px solid ${BD}`, borderRadius: 20, padding: "4px 10px", fontSize: 13, fontWeight: 600, color: A }}>{ME.dupr}</div>
+    <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#0a0a0a", padding: "16px 16px 12px", marginLeft: -16, marginRight: -16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <div style={{ fontSize: 11, color: MU, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 }}>{subtitle}</div>
+          <div style={{ fontSize: size, fontWeight: 600, color: "#fff" }}>{title}</div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ background: IN, border: `1px solid ${BD}`, borderRadius: 20, padding: "4px 10px", fontSize: 13, fontWeight: 600, color: A }}>{ME.dupr}</div>
+          <PhotoAvatar initials={ME.avatar} size={34} fallbackBg={A} fallbackColor="#000" />
+        </div>
       </div>
     </div>
   );
@@ -519,7 +521,7 @@ function SavedScreen({ sessions }: { sessions: Session[] }) {
   const SORT_LABELS: Record<string, string> = { match: "Best match", wait: "Wait time", friends: "Friends" };
 
   return (
-    <div style={{ paddingTop: 24 }}>
+    <div>
       <div style={{ padding: "0 16px" }}>
         <TopBar subtitle="Saved" title="Your shortlist" />
         <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
@@ -623,7 +625,7 @@ function SceneScreen() {
   const suggestions = CROSSED_PATHS.filter(p => !dismissed.has(p.initials));
 
   return (
-    <div style={{ paddingTop: 24 }}>
+    <div>
       <div style={{ padding: "0 16px" }}>
         <TopBar subtitle="Around you" title="Players & places" />
       </div>
@@ -863,7 +865,7 @@ export default function App() {
 
         {/* ── SWIPE TAB ── */}
         {activeTab === "swipe" && (
-          <div style={{ padding: "24px 16px 0" }}>
+          <div style={{ padding: "0 16px" }}>
             <TopBar subtitle="Exciting" title="Find your game" />
 
             {/* Filters */}
