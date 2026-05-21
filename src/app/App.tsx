@@ -7,6 +7,7 @@ import {
   ThumbsUp, Zap, Target, Users, Flame,
   Clock, MapPin, X, Check, RotateCcw, RefreshCw,
   Bookmark, Layers, Heart, Sparkles, ArrowRight, Trophy,
+  Star, Wine,
 } from "lucide-react";
 
 /* ── Tokens ────────────────────────────────────────────────── */
@@ -819,19 +820,25 @@ const VENUE_DISTRICTS: Record<string, string> = {
 };
 
 function MatchBadge({ pct }: { pct: number }) {
-  const r = 44, c = 2 * Math.PI * r, dash = (pct / 100) * c;
+  const r = 52, c = 2 * Math.PI * r, dash = (pct / 100) * c;
   return (
-    <div style={{ position: "relative", width: 110, height: 110, flexShrink: 0 }}>
-      <div style={{ position: "absolute", inset: -8, borderRadius: "50%", background: "radial-gradient(circle, rgba(245,166,35,0.15) 0%, transparent 70%)" }} />
-      <svg width={110} height={110} viewBox="0 0 110 110" style={{ transform: "rotate(-90deg)" }}>
-        <circle cx={55} cy={55} r={r} fill="rgba(11,11,12,0.6)" stroke="rgba(245,166,35,0.15)" strokeWidth={3} />
-        <circle cx={55} cy={55} r={r} fill="none" stroke={A} strokeWidth={3.5}
+    <div style={{ position: "relative", width: 130, height: 130, flexShrink: 0 }}>
+      {/* Ambient glow */}
+      <div style={{ position: "absolute", inset: -16, borderRadius: "50%", background: "radial-gradient(circle, rgba(245,166,35,0.2) 0%, transparent 65%)", filter: "blur(8px)" }} />
+      {/* Frosted glass background */}
+      <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "rgba(11,11,12,0.55)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }} />
+      <svg width={130} height={130} viewBox="0 0 130 130" style={{ position: "relative", transform: "rotate(-90deg)" }}>
+        <circle cx={65} cy={65} r={r} fill="none" stroke="rgba(245,166,35,0.12)" strokeWidth={3} />
+        <circle cx={65} cy={65} r={r} fill="none" stroke={A} strokeWidth={3.5}
           strokeDasharray={`${dash} ${c - dash}`} strokeLinecap="round"
-          style={{ filter: "drop-shadow(0 0 6px rgba(245,166,35,0.5))" }} />
+          style={{ filter: "drop-shadow(0 0 8px rgba(245,166,35,0.6))" }} />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: 30, fontWeight: 700, color: A, lineHeight: 1 }}>{pct}<span style={{ fontSize: 18 }}>%</span></span>
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.55)", marginTop: 4 }}>Great match!</span>
+        {/* Small star top-right */}
+        <Star size={10} fill={A} color={A} strokeWidth={0} style={{ position: "absolute", top: 22, right: 24, opacity: 0.7 }} />
+        <Star size={7} fill={A} color={A} strokeWidth={0} style={{ position: "absolute", top: 18, right: 34, opacity: 0.4 }} />
+        <span style={{ fontSize: 36, fontWeight: 700, color: A, lineHeight: 1 }}>{pct}<span style={{ fontSize: 20, fontWeight: 600 }}>%</span></span>
+        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 4 }}>Great match!</span>
       </div>
     </div>
   );
@@ -839,24 +846,25 @@ function MatchBadge({ pct }: { pct: number }) {
 
 function TestCardContent({ s }: { s: Session }) {
   const friends = s.players.filter(p => p.isFriend);
-  const topPlayers = s.players.filter(p => !p.isFriend).slice(0, 2);
+  const allAvatars = s.players.slice(0, 3);
   const friendLine = friends.length > 0
-    ? `${friends[0].name} + ${friends.length - 1} friends joining`
+    ? `${friends[0].name} + ${Math.max(1, friends.length - 1)} friends joining`
     : `${s.filled} players joining`;
   const district = VENUE_DISTRICTS[s.venue] || s.venue;
+  const remaining = Math.max(0, s.filled - 3);
 
-  const vibeTags: { emoji: string; label: string }[] = [];
-  if (s.matchScore >= 80) vibeTags.push({ emoji: "🔥", label: "Popular" });
   const inRange = ME.dupr >= s.duprRange.min && ME.dupr <= s.duprRange.max;
-  vibeTags.push({ emoji: "🎯", label: inRange ? "Intermediate" : "Competitive" });
-  if (s.vibe === "Social" || s.vibe === "Chill") vibeTags.push({ emoji: "🍻", label: "Social vibe" });
-  else vibeTags.push({ emoji: "⚡", label: "Intense" });
+  const vibeTags: { icon: React.ReactNode; label: string }[] = [];
+  if (s.matchScore >= 80) vibeTags.push({ icon: <Flame size={13} strokeWidth={1.8} color={A} />, label: "Popular" });
+  vibeTags.push({ icon: <Target size={13} strokeWidth={1.8} color={A} />, label: inRange ? "Intermediate" : "Competitive" });
+  if (s.vibe === "Social" || s.vibe === "Chill") vibeTags.push({ icon: <Wine size={13} strokeWidth={1.8} color={A} />, label: "Social vibe" });
+  else vibeTags.push({ icon: <Zap size={13} strokeWidth={1.8} color={A} />, label: "Intense" });
 
   return (
-    <div style={{ position: "relative", borderRadius: 24, overflow: "hidden", height: "100%" }}>
+    <div style={{ position: "relative", borderRadius: 28, overflow: "hidden", height: "100%" }}>
       <CardBgRotator />
-      {/* Gradient: visible image top half, dark bottom half */}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(11,11,12,0.1) 0%, rgba(11,11,12,0.25) 35%, rgba(11,11,12,0.75) 55%, rgba(11,11,12,0.95) 70%, rgba(11,11,12,0.98) 100%)", zIndex: 1 }} />
+      {/* Lighter gradient — image visible top 55%, fading into dark */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(11,11,12,0.05) 0%, rgba(11,11,12,0.15) 30%, rgba(11,11,12,0.5) 48%, rgba(11,11,12,0.88) 60%, #0B0B0C 75%)", zIndex: 1 }} />
 
       <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", padding: "16px 20px 22px" }}>
 
@@ -873,50 +881,48 @@ function TestCardContent({ s }: { s: Session }) {
           </span>
         </div>
 
-        {/* Title block — overlaid on image */}
-        <h2 style={{ fontSize: 34, fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: "0 0 6px", maxWidth: "75%" }}>{s.name}</h2>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
-          <Layers size={13} color="rgba(255,255,255,0.45)" strokeWidth={1.5} />
-          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.45)" }}>{s.court}</span>
+        {/* Title block — overlaid on the image */}
+        <h2 style={{ fontSize: 34, fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: "0 0 6px", maxWidth: "70%", textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>{s.name}</h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 0 }}>
+          <Layers size={13} color="rgba(255,255,255,0.5)" strokeWidth={1.5} />
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{s.court}</span>
         </div>
 
-        {/* Match badge — positioned bottom-left of image zone */}
-        <div style={{ marginBottom: 18 }}>
+        {/* Match badge — overlaps the image/content boundary */}
+        <div style={{ marginTop: -10, marginBottom: 16, position: "relative", zIndex: 3 }}>
           <MatchBadge pct={s.matchScore} />
         </div>
 
-        {/* Social proof */}
+        {/* Social proof — 3 avatars + "+N" */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <div style={{ display: "flex" }}>
-            {friends.slice(0, 2).map((p, i) => (
+            {allAvatars.map((p, i) => (
               <PhotoAvatar key={p.avatar} initials={p.avatar} size={34} fallbackBg="#333"
                 style={{ border: "2px solid #0B0B0C", marginLeft: i > 0 ? -10 : 0, position: "relative", zIndex: 6 - i }} />
             ))}
-            {topPlayers.slice(0, 2).map((p, i) => (
-              <div key={p.avatar} style={{ marginLeft: -10, position: "relative", zIndex: 4 - i }}>
-                <PhotoAvatar initials={p.avatar} size={34} fallbackBg="#333"
-                  style={{ border: "2px solid #0B0B0C", boxShadow: "0 0 0 1.5px rgba(245,166,35,0.45)" }} />
+            {remaining > 0 && (
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "2px solid #0B0B0C", marginLeft: -10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.5)", position: "relative", zIndex: 0 }}>
+                +{remaining}
               </div>
-            ))}
-            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "2px solid #0B0B0C", marginLeft: -10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.5)", position: "relative", zIndex: 0 }}>
-              +{Math.max(0, s.filled - friends.length - topPlayers.length)}
-            </div>
+            )}
           </div>
-          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{friendLine} 🧡</span>
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>
+            {friendLine} <Heart size={12} fill={A} color={A} strokeWidth={0} style={{ display: "inline", verticalAlign: "-1px" }} />
+          </span>
         </div>
 
-        {/* Tags */}
+        {/* Tags — no border, subtle bg, SVG icons */}
         <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
           {vibeTags.map((t, i) => (
-            <span key={i} style={{ background: "rgba(245,166,35,0.08)", border: "1px solid rgba(245,166,35,0.15)", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 500, color: A }}>
-              {t.emoji} {t.label}
+            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(245,166,35,0.08)", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 500, color: A, border: "none" }}>
+              {t.icon} {t.label}
             </span>
           ))}
         </div>
 
-        {/* CTA */}
-        <button style={{ width: "100%", background: A, border: "none", borderRadius: 18, padding: "16px 0", cursor: "pointer", fontFamily: "inherit", fontSize: 17, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "center", gap: 12, boxShadow: "0 4px 28px rgba(245,166,35,0.3)" }}>
-          I'm In
+        {/* CTA — text left-center, arrow far right */}
+        <button style={{ width: "100%", background: A, border: "none", borderRadius: 18, padding: "16px 20px", cursor: "pointer", fontFamily: "inherit", fontSize: 17, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 4px 28px rgba(245,166,35,0.3)" }}>
+          <span style={{ flex: 1, textAlign: "center" }}>I'm In</span>
           <ArrowRight size={20} strokeWidth={2.5} />
         </button>
       </div>
@@ -1063,11 +1069,11 @@ function TestScreen() {
             {/* Card stack shadows */}
             {deck[currentIdx + 2] && (
               <motion.div animate={isExiting ? { opacity: 0.3 } : { opacity: 0.12 }} transition={{ duration: 0.3 }}
-                style={{ position: "absolute", top: 8, left: 12, right: 12, bottom: -4, background: "rgba(30,30,30,0.6)", borderRadius: 24, zIndex: 0, pointerEvents: "none" }} />
+                style={{ position: "absolute", top: 8, left: 12, right: 12, bottom: -4, background: "rgba(30,30,30,0.6)", borderRadius: 28, zIndex: 0, pointerEvents: "none" }} />
             )}
             {deck[currentIdx + 1] && (
               <motion.div animate={isExiting ? { opacity: 0.6 } : { opacity: 0.25 }} transition={{ duration: 0.3 }}
-                style={{ position: "absolute", top: 4, left: 6, right: 6, bottom: -2, background: "rgba(30,30,30,0.8)", borderRadius: 24, zIndex: 1, pointerEvents: "none" }} />
+                style={{ position: "absolute", top: 4, left: 6, right: 6, bottom: -2, background: "rgba(30,30,30,0.8)", borderRadius: 28, zIndex: 1, pointerEvents: "none" }} />
             )}
             <div style={{ position: "relative", zIndex: 2, height: "100%" }}>
               <TestSwipeCard s={current} isExiting={isExiting} exitDir={exitDir} onAction={handleAction} onExited={handleExited} />
@@ -1084,8 +1090,8 @@ function TestScreen() {
             <X size={24} color="#777" strokeWidth={2} />
           </button>
           <button onClick={handleUndo} disabled={!canUndo}
-            style={{ width: 50, height: 50, borderRadius: "50%", background: canUndo ? "#1a1a1a" : "#111", border: `1.5px solid ${canUndo ? "#2a2a2a" : "#1a1a1a"}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: canUndo ? "pointer" : "default", opacity: canUndo ? 1 : 0.2, transition: "opacity 0.2s" }}>
-            <RotateCcw size={18} color="#666" strokeWidth={2} />
+            style={{ width: 52, height: 52, borderRadius: "50%", background: "#1a1a1a", border: "1.5px solid #2a2a2a", display: "flex", alignItems: "center", justifyContent: "center", cursor: canUndo ? "pointer" : "default", opacity: canUndo ? 1 : 0.35, transition: "opacity 0.2s" }}>
+            <RotateCcw size={18} color="#888" strokeWidth={2} />
           </button>
           <button onClick={() => triggerExit("join")} disabled={isExiting}
             style={{ width: 64, height: 64, borderRadius: "50%", background: A, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.5 : 1, boxShadow: "0 4px 24px rgba(245,166,35,0.35)" }}>
