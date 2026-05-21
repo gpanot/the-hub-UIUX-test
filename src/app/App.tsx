@@ -267,7 +267,13 @@ function CardContent({ s, active, setActive, carouselMode = false, isBestMatch =
 }) {
   const handleUserTap = useAutoRotate(active, setActive);
   return (
-    <div style={{ background: S, border: `1px solid ${BD}`, borderRadius: 20, padding: 16, overflow: "hidden", ...(carouselMode ? { flex: 1, display: "flex", flexDirection: "column" } as React.CSSProperties : {}) }}>
+    <div style={{ position: "relative", border: `1px solid ${BD}`, borderRadius: 20, overflow: "hidden", ...(carouselMode ? { flex: 1, display: "flex", flexDirection: "column" } as React.CSSProperties : {}) }}>
+      {/* Background image */}
+      <div style={{ position: "absolute", inset: 0, backgroundImage: "url(/card-bg.webp)", backgroundSize: "cover", backgroundPosition: "center", zIndex: 0 }} />
+      {/* Dark overlay */}
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 1 }} />
+      {/* Card content */}
+      <div style={{ position: "relative", zIndex: 2, padding: 16, ...(carouselMode ? { flex: 1, display: "flex", flexDirection: "column" } as React.CSSProperties : {}) }}>
       {isBestMatch && (
         <div style={{ marginBottom: 10 }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: A, border: `1px solid ${A}55`, borderRadius: 20, padding: "3px 10px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
@@ -334,6 +340,7 @@ function CardContent({ s, active, setActive, carouselMode = false, isBestMatch =
           <div style={{ fontSize: 15, fontWeight: 600, color: "#000" }}>Shortlist</div>
         </button>
       )}
+      </div>{/* end card content */}
     </div>
   );
 }
