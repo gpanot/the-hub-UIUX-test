@@ -260,6 +260,25 @@ function useAutoRotate(active: ConcernId, setActive: (id: ConcernId) => void) {
   return handleUserTap;
 }
 
+/* ── Card background images ────────────────────────────────── */
+const CARD_BG_IMAGES = ["/card-bg.webp", "/card-bg-2.jpg"];
+
+function CardBgRotator() {
+  const [activeImg, setActiveImg] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setActiveImg(prev => (prev + 1) % CARD_BG_IMAGES.length), 5000);
+    return () => clearInterval(timer);
+  }, []);
+  return (
+    <>
+      {CARD_BG_IMAGES.map((src, i) => (
+        <div key={src} style={{ position: "absolute", inset: 0, backgroundImage: `url(${src})`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0, opacity: i === activeImg ? 1 : 0, transition: "opacity 1.2s ease-in-out" }} />
+      ))}
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.90)", zIndex: 1 }} />
+    </>
+  );
+}
+
 /* ── CardContent ───────────────────────────────────────────── */
 function CardContent({ s, active, setActive, carouselMode = false, isBestMatch = false, onRemove }: {
   s: Session; active: ConcernId; setActive: (id: ConcernId) => void;
@@ -268,10 +287,7 @@ function CardContent({ s, active, setActive, carouselMode = false, isBestMatch =
   const handleUserTap = useAutoRotate(active, setActive);
   return (
     <div style={{ position: "relative", border: `1px solid ${BD}`, borderRadius: 20, overflow: "hidden", ...(carouselMode ? { flex: 1, display: "flex", flexDirection: "column" } as React.CSSProperties : {}) }}>
-      {/* Background image */}
-      <div style={{ position: "absolute", inset: 0, backgroundImage: "url(/card-bg.webp)", backgroundSize: "cover", backgroundPosition: "center", zIndex: 0 }} />
-      {/* Dark overlay */}
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 1 }} />
+      <CardBgRotator />
       {/* Card content */}
       <div style={{ position: "relative", zIndex: 2, padding: 16, ...(carouselMode ? { flex: 1, display: "flex", flexDirection: "column" } as React.CSSProperties : {}) }}>
       {isBestMatch && (
