@@ -6,7 +6,7 @@ import {
 import {
   ThumbsUp, Zap, Target, Users, Flame,
   Clock, MapPin, X, Check, RotateCcw, RefreshCw,
-  Bookmark, Layers, Heart, Sparkles,
+  Bookmark, Layers, Heart, Sparkles, ArrowRight, Trophy,
 } from "lucide-react";
 
 /* ── Tokens ────────────────────────────────────────────────── */
@@ -804,24 +804,34 @@ function SceneScreen() {
 /* ── Test Screen — Premium Emotional UI ────────────────────── */
 type TestFilterId = "foryou" | "competitive" | "friends";
 
-const TEST_FILTERS: { id: TestFilterId; label: string }[] = [
-  { id: "foryou", label: "For You" },
-  { id: "competitive", label: "Competitive" },
-  { id: "friends", label: "Friends" },
+const TEST_FILTERS: { id: TestFilterId; label: string; icon: React.ReactNode }[] = [
+  { id: "foryou", label: "For You", icon: <Heart size={13} strokeWidth={1.5} /> },
+  { id: "competitive", label: "Competitive", icon: <Trophy size={13} strokeWidth={1.5} /> },
+  { id: "friends", label: "Friends", icon: <Users size={13} strokeWidth={1.5} /> },
 ];
 
-function MatchRing({ pct }: { pct: number }) {
-  const r = 28, c = 2 * Math.PI * r, dash = (pct / 100) * c;
+const VENUE_DISTRICTS: Record<string, string> = {
+  "D9 Sports Club": "District 2",
+  "District 7 Courts": "District 7",
+  "Landmark 81": "Binh Thanh",
+  "Ben Thanh Sports": "District 1",
+  "Thao Dien Courts": "Thao Dien",
+};
+
+function MatchBadge({ pct }: { pct: number }) {
+  const r = 44, c = 2 * Math.PI * r, dash = (pct / 100) * c;
   return (
-    <div style={{ position: "relative", width: 72, height: 72, flexShrink: 0 }}>
-      <svg width={72} height={72} viewBox="0 0 72 72" style={{ transform: "rotate(-90deg)" }}>
-        <circle cx={36} cy={36} r={r} fill="none" stroke="rgba(245,166,35,0.12)" strokeWidth={4} />
-        <circle cx={36} cy={36} r={r} fill="none" stroke={A} strokeWidth={4}
-          strokeDasharray={`${dash} ${c - dash}`} strokeLinecap="round" />
+    <div style={{ position: "relative", width: 110, height: 110, flexShrink: 0 }}>
+      <div style={{ position: "absolute", inset: -8, borderRadius: "50%", background: "radial-gradient(circle, rgba(245,166,35,0.15) 0%, transparent 70%)" }} />
+      <svg width={110} height={110} viewBox="0 0 110 110" style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={55} cy={55} r={r} fill="rgba(11,11,12,0.6)" stroke="rgba(245,166,35,0.15)" strokeWidth={3} />
+        <circle cx={55} cy={55} r={r} fill="none" stroke={A} strokeWidth={3.5}
+          strokeDasharray={`${dash} ${c - dash}`} strokeLinecap="round"
+          style={{ filter: "drop-shadow(0 0 6px rgba(245,166,35,0.5))" }} />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: 18, fontWeight: 700, color: "#fff", lineHeight: 1 }}>{pct}%</span>
-        <span style={{ fontSize: 8, color: "rgba(255,255,255,0.45)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 2 }}>match</span>
+        <span style={{ fontSize: 30, fontWeight: 700, color: A, lineHeight: 1 }}>{pct}<span style={{ fontSize: 18 }}>%</span></span>
+        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.55)", marginTop: 4 }}>Great match!</span>
       </div>
     </div>
   );
@@ -831,82 +841,83 @@ function TestCardContent({ s }: { s: Session }) {
   const friends = s.players.filter(p => p.isFriend);
   const topPlayers = s.players.filter(p => !p.isFriend).slice(0, 2);
   const friendLine = friends.length > 0
-    ? `${friends[0].name}${friends.length > 1 ? ` +${friends.length - 1} friend${friends.length > 1 ? "s" : ""}` : ""} joining`
+    ? `${friends[0].name} + ${friends.length - 1} friends joining`
     : `${s.filled} players joining`;
+  const district = VENUE_DISTRICTS[s.venue] || s.venue;
 
   const vibeTags: { emoji: string; label: string }[] = [];
   if (s.matchScore >= 80) vibeTags.push({ emoji: "🔥", label: "Popular" });
   const inRange = ME.dupr >= s.duprRange.min && ME.dupr <= s.duprRange.max;
-  vibeTags.push({ emoji: "🎯", label: inRange ? "My Level" : "Competitive" });
+  vibeTags.push({ emoji: "🎯", label: inRange ? "Intermediate" : "Competitive" });
   if (s.vibe === "Social" || s.vibe === "Chill") vibeTags.push({ emoji: "🍻", label: "Social vibe" });
   else vibeTags.push({ emoji: "⚡", label: "Intense" });
 
   return (
     <div style={{ position: "relative", borderRadius: 24, overflow: "hidden", height: "100%" }}>
-      {/* Background images with crossfade */}
       <CardBgRotator />
-      {/* Gradient overlay — stronger at bottom */}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(11,11,12,0.35) 0%, rgba(11,11,12,0.55) 30%, rgba(11,11,12,0.92) 65%, rgba(11,11,12,0.98) 100%)", zIndex: 1 }} />
+      {/* Gradient: visible image top half, dark bottom half */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(11,11,12,0.1) 0%, rgba(11,11,12,0.25) 35%, rgba(11,11,12,0.75) 55%, rgba(11,11,12,0.95) 70%, rgba(11,11,12,0.98) 100%)", zIndex: 1 }} />
 
-      {/* Content */}
-      <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "20px 20px 24px" }}>
+      <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", padding: "16px 20px 22px" }}>
 
-        {/* Top row pills */}
-        <div style={{ position: "absolute", top: 16, left: 20, right: 20, display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ background: "rgba(245,166,35,0.18)", backdropFilter: "blur(12px)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 600, color: A }}>
+        {/* Top row: Tonight + time + location */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "auto" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(245,166,35,0.18)", backdropFilter: "blur(12px)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: 20, padding: "5px 14px", fontSize: 12, fontWeight: 600, color: A }}>
+            <Clock size={12} strokeWidth={2} />
             Tonight
           </span>
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
-            <Clock size={10} strokeWidth={1.5} style={{ display: "inline", verticalAlign: "-1px", marginRight: 4 }} />
-            {s.time}
-          </span>
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
-            <MapPin size={10} strokeWidth={1.5} style={{ display: "inline", verticalAlign: "-1px", marginRight: 4 }} />
-            {s.venue.replace(/\s*Courts?.*/, "").replace(/\s*Sports?.*/, "")}
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.6)" }}>{s.time}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, color: "rgba(255,255,255,0.6)" }}>
+            <MapPin size={12} strokeWidth={1.5} />
+            {district}
           </span>
         </div>
 
-        {/* Title + Match ring */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 16 }}>
-          <div style={{ flex: 1, paddingRight: 16 }}>
-            <h2 style={{ fontSize: 26, fontWeight: 700, color: "#fff", lineHeight: 1.15, margin: "0 0 6px" }}>{s.name}</h2>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: 0 }}>{s.court}</p>
-          </div>
-          <MatchRing pct={s.matchScore} />
+        {/* Title block — overlaid on image */}
+        <h2 style={{ fontSize: 34, fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: "0 0 6px", maxWidth: "75%" }}>{s.name}</h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
+          <Layers size={13} color="rgba(255,255,255,0.45)" strokeWidth={1.5} />
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.45)" }}>{s.court}</span>
         </div>
 
-        {/* Social proof — merged avatars */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+        {/* Match badge — positioned bottom-left of image zone */}
+        <div style={{ marginBottom: 18 }}>
+          <MatchBadge pct={s.matchScore} />
+        </div>
+
+        {/* Social proof */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <div style={{ display: "flex" }}>
             {friends.slice(0, 2).map((p, i) => (
-              <PhotoAvatar key={p.avatar} initials={p.avatar} size={32} fallbackBg="#333"
-                style={{ border: "2px solid #0B0B0C", marginLeft: i > 0 ? -10 : 0, position: "relative", zIndex: 4 - i }} />
+              <PhotoAvatar key={p.avatar} initials={p.avatar} size={34} fallbackBg="#333"
+                style={{ border: "2px solid #0B0B0C", marginLeft: i > 0 ? -10 : 0, position: "relative", zIndex: 6 - i }} />
             ))}
             {topPlayers.slice(0, 2).map((p, i) => (
-              <div key={p.avatar} style={{ marginLeft: -10, position: "relative", zIndex: 2 - i }}>
-                <PhotoAvatar initials={p.avatar} size={32} fallbackBg="#333"
-                  style={{ border: "2px solid #0B0B0C", boxShadow: `0 0 0 1.5px rgba(245,166,35,0.4)` }} />
+              <div key={p.avatar} style={{ marginLeft: -10, position: "relative", zIndex: 4 - i }}>
+                <PhotoAvatar initials={p.avatar} size={34} fallbackBg="#333"
+                  style={{ border: "2px solid #0B0B0C", boxShadow: "0 0 0 1.5px rgba(245,166,35,0.45)" }} />
               </div>
             ))}
-            <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "2px solid #0B0B0C", marginLeft: -10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.5)", position: "relative", zIndex: 0 }}>
+            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "2px solid #0B0B0C", marginLeft: -10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.5)", position: "relative", zIndex: 0 }}>
               +{Math.max(0, s.filled - friends.length - topPlayers.length)}
             </div>
           </div>
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>{friendLine}</span>
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{friendLine} 🧡</span>
         </div>
 
         {/* Tags */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
           {vibeTags.map((t, i) => (
-            <span key={i} style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: "5px 12px", fontSize: 11, color: "rgba(255,255,255,0.55)" }}>
+            <span key={i} style={{ background: "rgba(245,166,35,0.08)", border: "1px solid rgba(245,166,35,0.15)", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 500, color: A }}>
               {t.emoji} {t.label}
             </span>
           ))}
         </div>
 
         {/* CTA */}
-        <button style={{ width: "100%", background: `linear-gradient(135deg, ${A}, #e09422)`, border: "none", borderRadius: 16, padding: "16px 0", cursor: "pointer", fontFamily: "inherit", fontSize: 16, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.02em", boxShadow: "0 4px 24px rgba(245,166,35,0.25)" }}>
+        <button style={{ width: "100%", background: A, border: "none", borderRadius: 18, padding: "16px 0", cursor: "pointer", fontFamily: "inherit", fontSize: 17, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "center", gap: 12, boxShadow: "0 4px 28px rgba(245,166,35,0.3)" }}>
           I'm In
+          <ArrowRight size={20} strokeWidth={2.5} />
         </button>
       </div>
     </div>
@@ -1017,17 +1028,17 @@ function TestScreen() {
       </div>
 
       {/* Filter pills */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
         {TEST_FILTERS.map(f => {
           const on = testFilter === f.id;
           return (
             <button key={f.id} onClick={() => setTestFilter(f.id)}
-              style={{ padding: "8px 18px", borderRadius: 24, fontSize: 13, fontWeight: on ? 600 : 400, cursor: "pointer", fontFamily: "inherit", border: "none",
-                background: on ? "rgba(245,166,35,0.15)" : "rgba(255,255,255,0.04)",
-                color: on ? A : "rgba(255,255,255,0.4)",
-                backdropFilter: "blur(12px)",
-                ...(on ? { boxShadow: `inset 0 0 0 1px rgba(245,166,35,0.3)` } : { boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)" }),
+              style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 24, fontSize: 13, fontWeight: on ? 600 : 400, cursor: "pointer", fontFamily: "inherit",
+                background: on ? A : "rgba(255,255,255,0.04)",
+                color: on ? "#0B0B0C" : "rgba(255,255,255,0.4)",
+                border: on ? "none" : "1px solid rgba(255,255,255,0.08)",
               }}>
+              <span style={{ color: on ? "#0B0B0C" : "rgba(255,255,255,0.35)", display: "flex" }}>{f.icon}</span>
               {f.label}
             </button>
           );
@@ -1067,18 +1078,18 @@ function TestScreen() {
 
       {/* Action buttons */}
       {!isDone && current && (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 24, paddingBottom: 12 }}>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 28, paddingBottom: 12 }}>
           <button onClick={() => triggerExit("skip")} disabled={isExiting}
-            style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.4 : 1, backdropFilter: "blur(8px)" }}>
-            <X size={22} color="rgba(255,255,255,0.45)" strokeWidth={2} />
+            style={{ width: 58, height: 58, borderRadius: "50%", background: "#1a1a1a", border: "1.5px solid #2a2a2a", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.4 : 1 }}>
+            <X size={24} color="#777" strokeWidth={2} />
           </button>
           <button onClick={handleUndo} disabled={!canUndo}
-            style={{ width: 42, height: 42, borderRadius: "50%", background: canUndo ? "rgba(255,255,255,0.04)" : "transparent", border: `1px solid ${canUndo ? "rgba(255,255,255,0.08)" : "transparent"}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: canUndo ? "pointer" : "default", opacity: canUndo ? 1 : 0.15, transition: "opacity 0.2s" }}>
-            <RotateCcw size={16} color="rgba(255,255,255,0.4)" strokeWidth={2} />
+            style={{ width: 50, height: 50, borderRadius: "50%", background: canUndo ? "#1a1a1a" : "#111", border: `1.5px solid ${canUndo ? "#2a2a2a" : "#1a1a1a"}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: canUndo ? "pointer" : "default", opacity: canUndo ? 1 : 0.2, transition: "opacity 0.2s" }}>
+            <RotateCcw size={18} color="#666" strokeWidth={2} />
           </button>
           <button onClick={() => triggerExit("join")} disabled={isExiting}
-            style={{ width: 56, height: 56, borderRadius: "50%", background: `linear-gradient(135deg, ${A}, #e09422)`, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.5 : 1, boxShadow: "0 4px 20px rgba(245,166,35,0.3)" }}>
-            <Heart size={24} color="#0B0B0C" fill="#0B0B0C" strokeWidth={2} />
+            style={{ width: 64, height: 64, borderRadius: "50%", background: A, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.5 : 1, boxShadow: "0 4px 24px rgba(245,166,35,0.35)" }}>
+            <Heart size={28} color="#0B0B0C" fill="#0B0B0C" strokeWidth={2} />
           </button>
         </div>
       )}
