@@ -509,8 +509,8 @@ function TopBar({ subtitle, title, size = 20, onAvatarTap }: { subtitle?: string
 /* ── Bottom nav ────────────────────────────────────────────── */
 function BottomNav({ active, onSelect, savedCount }: { active: TabId; onSelect: (t: TabId) => void; savedCount: number }) {
   const tabs: { id: TabId; icon: React.ReactNode; label: string; badge?: number }[] = [
-    { id: "swipe", icon: <Layers   size={18} strokeWidth={1.5} />, label: "Swipe" },
-    { id: "saved", icon: <Bookmark size={18} strokeWidth={1.5} />, label: "Saved", badge: savedCount },
+    // { id: "swipe", icon: <Layers   size={18} strokeWidth={1.5} />, label: "Swipe" },
+    // { id: "saved", icon: <Bookmark size={18} strokeWidth={1.5} />, label: "Saved", badge: savedCount },
     { id: "scene", icon: <MapPin   size={18} strokeWidth={1.5} />, label: "Around Me" },
     { id: "test",  icon: <Sparkles size={18} strokeWidth={1.5} />, label: "Test" },
     { id: "testsaved", icon: <Heart size={18} strokeWidth={1.5} />, label: "Test Saved" },
@@ -1283,7 +1283,7 @@ function TestSavedScreen({ sessions }: { sessions: Session[] }) {
         <div ref={scrollRef} onScroll={handleScroll}
           style={{ flex: 1, display: "flex", gap: 12, marginLeft: -16, paddingLeft: 16, marginRight: -16, paddingRight: 16, overflowX: "auto", scrollSnapType: "x mandatory", scrollbarWidth: "none", alignItems: "stretch" } as React.CSSProperties}>
           {visibleSessions.length > 0 ? visibleSessions.map((sess, i) => (
-            <TestCarouselCard key={sess.id} s={sess} isBestMatch={i === 0} onRemove={() => handleRemove(sess.id)} />
+            <TestCarouselCard key={sess.id} s={sess} onRemove={() => handleRemove(sess.id)} />
           )) : (
             <div style={{ padding: "48px 0", color: "rgba(255,255,255,0.3)", fontSize: 13 }}>No saved sessions yet.</div>
           )}
@@ -1312,7 +1312,7 @@ const FILTERS: { id: FilterId; label: string; icon?: React.ReactNode }[] = [
 
 /* ── App ───────────────────────────────────────────────────── */
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabId>("swipe");
+  const [activeTab, setActiveTab] = useState<TabId>("test");
   const [overlayOpacity, setOverlayOpacity] = useState(0.9);
   const savedSessions = ALL_SESSIONS.filter(s => SAVED_IDS.includes(s.id));
 
