@@ -68,7 +68,7 @@ type Session     = { id: number; name: string; venue: string; court: string; tim
 type ConcernId   = "friends" | "swiperight" | "wait" | "level" | "vibe";
 type FilterId    = "all" | "fast" | "level" | "friends";
 type SwipeAction = "join" | "skip";
-type TabId       = "swipe" | "saved" | "scene" | "test";
+type TabId       = "swipe" | "saved" | "scene" | "test" | "testsaved";
 type AroundMeTab = "hotspots" | "circle";
 
 /* ── Data ──────────────────────────────────────────────────── */
@@ -491,6 +491,7 @@ function BottomNav({ active, onSelect, savedCount }: { active: TabId; onSelect: 
     { id: "saved", icon: <Bookmark size={18} strokeWidth={1.5} />, label: "Saved", badge: savedCount },
     { id: "scene", icon: <MapPin   size={18} strokeWidth={1.5} />, label: "Around Me" },
     { id: "test",  icon: <Sparkles size={18} strokeWidth={1.5} />, label: "Test" },
+    { id: "testsaved", icon: <Heart size={18} strokeWidth={1.5} />, label: "Test Saved" },
   ];
   return (
     <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, height: 64, background: "#0a0a0a", borderTop: "0.5px solid #1e1e1e", display: "flex", zIndex: 200 }}>
@@ -1005,6 +1006,37 @@ function TestSwipeCard({ s, isExiting, exitDir, onAction, onExited }: {
   );
 }
 
+/* ── Test Secondary Card (up next) ─────────────────────────── */
+function TestSecondaryCard({ s }: { s: Session }) {
+  const mc = s.matchScore >= 85 ? A : s.matchScore >= 70 ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.3)";
+  const distance = VENUE_DISTANCE[s.venue] || "3.2 km";
+  const price = SESSION_PRICE[s.id] || "90k · 2h";
+  const friends = s.players.filter(p => p.isFriend);
+  return (
+    <div style={{ position: "relative", borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" }}>
+      <CardBgRotator />
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 1 }} />
+      <div style={{ position: "relative", zIndex: 2, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 4 }}>{s.name}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "rgba(255,255,255,0.4)" }}>
+            <span>{s.time}</span><span>·</span><span>{price}</span><span>·</span><span>{distance}</span>
+          </div>
+          {friends.length > 0 && (
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>
+              {friends[0].name} {friends.length > 1 ? `+${friends.length - 1} friends` : "going"}
+            </div>
+          )}
+        </div>
+        <div style={{ textAlign: "right", flexShrink: 0 }}>
+          <div style={{ fontSize: 20, fontWeight: 700, color: mc, lineHeight: 1 }}>{s.matchScore}%</div>
+          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 2 }}>Match</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TestScreen() {
   const [testFilter, setTestFilter] = useState<TestFilterId>("foryou");
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -1020,6 +1052,7 @@ function TestScreen() {
 
   const isDone = currentIdx >= deck.length;
   const current = deck[currentIdx];
+  const upNext = deck.slice(currentIdx + 1, currentIdx + 4);
   const canUndo = history.length > 0 && !isExiting;
 
   const triggerExit = (action: SwipeAction) => {
@@ -1043,7 +1076,7 @@ function TestScreen() {
   useEffect(() => { setCurrentIdx(0); setHistory([]); setIsExiting(false); }, [testFilter]);
 
   return (
-    <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", height: "calc(100dvh - 64px)" }}>
+    <div style={{ padding: "0 16px" }}>
       {/* Header */}
       <div style={{ padding: "16px 0 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, color: "#fff", margin: 0 }}>Find your game</h1>
@@ -1071,22 +1104,21 @@ function TestScreen() {
         })}
       </div>
 
-      {/* Card area — fills remaining space */}
-      <div style={{ flex: 1, position: "relative", marginBottom: 12, minHeight: 0 }}>
-        {isDone ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 20 }}>
-            <div style={{ fontSize: 48 }}>🏓</div>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.35)", textAlign: "center", maxWidth: 220 }}>
-              {deck.length === 0 ? "No games match this filter." : "You've seen all games tonight."}
-            </p>
-            <button onClick={handleReload}
-              style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `linear-gradient(135deg, ${A}, #e09422)`, border: "none", borderRadius: 14, padding: "12px 28px", fontSize: 14, fontWeight: 700, color: "#0B0B0C", cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 20px rgba(245,166,35,0.25)" }}>
-              <RefreshCw size={15} strokeWidth={2} /> Start over
-            </button>
-          </div>
-        ) : current && (
-          <>
-            {/* Card stack shadows */}
+      {isDone ? (
+        <div style={{ textAlign: "center", padding: "56px 0" }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>🏓</div>
+          <p style={{ fontSize: 15, color: "rgba(255,255,255,0.35)", marginBottom: 24 }}>
+            {deck.length === 0 ? "No games match this filter." : "You've seen all games tonight."}
+          </p>
+          <button onClick={handleReload}
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, background: A, border: "none", borderRadius: 14, padding: "12px 28px", fontSize: 14, fontWeight: 700, color: "#0B0B0C", cursor: "pointer", fontFamily: "inherit" }}>
+            <RefreshCw size={15} strokeWidth={2} /> Start over
+          </button>
+        </div>
+      ) : current && (
+        <>
+          {/* Card stack */}
+          <div style={{ position: "relative", marginBottom: 16, height: "min(520px, 58vh)" }}>
             {deck[currentIdx + 2] && (
               <motion.div animate={isExiting ? { opacity: 0.3 } : { opacity: 0.12 }} transition={{ duration: 0.3 }}
                 style={{ position: "absolute", top: 8, left: 12, right: 12, bottom: -4, background: "rgba(30,30,30,0.6)", borderRadius: 28, zIndex: 0, pointerEvents: "none" }} />
@@ -1098,25 +1130,187 @@ function TestScreen() {
             <div style={{ position: "relative", zIndex: 2, height: "100%" }}>
               <TestSwipeCard s={current} isExiting={isExiting} exitDir={exitDir} onAction={handleAction} onExited={handleExited} />
             </div>
-          </>
+          </div>
+
+          {/* Action buttons */}
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 28, marginBottom: 20 }}>
+            <button onClick={() => triggerExit("skip")} disabled={isExiting}
+              style={{ width: 58, height: 58, borderRadius: "50%", background: "#1a1a1a", border: "1.5px solid #2a2a2a", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.4 : 1 }}>
+              <X size={24} color="#777" strokeWidth={2} />
+            </button>
+            <button onClick={handleUndo} disabled={!canUndo}
+              style={{ width: 52, height: 52, borderRadius: "50%", background: "#1a1a1a", border: "1.5px solid #2a2a2a", display: "flex", alignItems: "center", justifyContent: "center", cursor: canUndo ? "pointer" : "default", opacity: canUndo ? 1 : 0.35, transition: "opacity 0.2s" }}>
+              <RotateCcw size={18} color="#888" strokeWidth={2} />
+            </button>
+            <button onClick={() => triggerExit("join")} disabled={isExiting}
+              style={{ width: 64, height: 64, borderRadius: "50%", background: A, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.5 : 1, boxShadow: "0 0 36px rgba(245,166,35,0.25), 0 4px 16px rgba(245,166,35,0.3)" }}>
+              <Heart size={28} color="#0B0B0C" fill="#0B0B0C" strokeWidth={2} />
+            </button>
+          </div>
+
+          {/* Up next */}
+          {upNext.length > 0 && (
+            <div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Up next</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {upNext.map((s, i) => (
+                  <div key={s.id} style={{ opacity: 1 - i * 0.2 }}>
+                    <TestSecondaryCard s={s} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ── Test Saved Screen ─────────────────────────────────────── */
+function TestCarouselCard({ s, isBestMatch, onRemove }: { s: Session; isBestMatch?: boolean; onRemove?: () => void }) {
+  const friends = s.players.filter(p => p.isFriend);
+  const allAvatars = s.players.slice(0, 3);
+  const friendLine = friends.length > 0
+    ? `${friends[0].name} +${Math.max(1, friends.length - 1)} friends`
+    : `${s.filled} players`;
+  const distance = VENUE_DISTANCE[s.venue] || "3.2 km";
+  const price = SESSION_PRICE[s.id] || "90k · 2h";
+  const remaining = Math.max(0, s.filled - 3);
+  const inRange = ME.dupr >= s.duprRange.min && ME.dupr <= s.duprRange.max;
+
+  const vibeTags: { icon: React.ReactNode; label: string }[] = [];
+  if (s.matchScore >= 80) vibeTags.push({ icon: <Flame size={12} strokeWidth={1.8} color={A} />, label: "Popular" });
+  vibeTags.push({ icon: <Target size={12} strokeWidth={1.8} color={A} />, label: inRange ? "Intermediate" : "Competitive" });
+  if (s.vibe === "Social" || s.vibe === "Chill") vibeTags.push({ icon: <Wine size={12} strokeWidth={1.8} color={A} />, label: "Social vibe" });
+
+  return (
+    <div style={{ minWidth: 290, width: "84vw", maxWidth: 360, flexShrink: 0, scrollSnapAlign: "start", display: "flex", flexDirection: "column" }}>
+      <div style={{ position: "relative", borderRadius: 24, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)", flex: 1, display: "flex", flexDirection: "column" }}>
+        <CardBgRotator />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.08) 45%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.92) 80%)", zIndex: 1 }} />
+        <div style={{ position: "absolute", inset: 0, background: "rgba(246,185,59,0.04)", zIndex: 1 }} />
+
+        <div style={{ position: "relative", zIndex: 2, flex: 1, display: "flex", flexDirection: "column", padding: "14px 16px 16px" }}>
+          {/* Top pills */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "auto" }}>
+            <span style={{ background: "rgba(246,185,59,0.12)", backdropFilter: "blur(12px)", borderRadius: 16, padding: "3px 10px", fontSize: 10, fontWeight: 600, color: A }}>Tonight</span>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>{s.time}</span>
+            <span style={{ flex: 1 }} />
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>{distance}</span>
+          </div>
+
+          {isBestMatch && (
+            <span style={{ alignSelf: "flex-start", fontSize: 10, fontWeight: 600, color: A, border: `1px solid rgba(245,166,35,0.3)`, borderRadius: 16, padding: "2px 10px", marginBottom: 6 }}>Best Match</span>
+          )}
+
+          {/* Title */}
+          <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", lineHeight: 1.15, marginBottom: 4, textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}>{s.name}</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginBottom: 10 }}>{price}</div>
+
+          {/* Match */}
+          <div style={{ fontSize: 22, fontWeight: 700, color: "rgba(220,170,60,0.85)", marginBottom: 10 }}>{s.matchScore}% <span style={{ fontSize: 10, fontWeight: 400, color: "rgba(255,255,255,0.35)" }}>match</span></div>
+
+          {/* Avatars */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <div style={{ display: "flex" }}>
+              {allAvatars.map((p, i) => (
+                <PhotoAvatar key={p.avatar} initials={p.avatar} size={28} fallbackBg="#333"
+                  style={{ border: "2px solid rgba(11,11,12,0.8)", marginLeft: i > 0 ? -8 : 0, position: "relative", zIndex: 4 - i }} />
+              ))}
+              {remaining > 0 && (
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "2px solid rgba(11,11,12,0.8)", marginLeft: -8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.4)" }}>+{remaining}</div>
+              )}
+            </div>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{friendLine}</span>
+          </div>
+
+          {/* Tags */}
+          <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+            {vibeTags.map((t, i) => (
+              <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(246,185,59,0.06)", borderRadius: 16, padding: "4px 10px", fontSize: 10, color: "rgba(220,170,60,0.9)" }}>{t.icon} {t.label}</span>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div style={{ marginTop: "auto", display: "flex", gap: 8 }}>
+            <a href="https://reclub.co/m/3CUP8A" target="_blank" rel="noopener noreferrer" style={{ flex: 1, textDecoration: "none" }}>
+              <div style={{ width: "100%", background: A, borderRadius: 14, padding: "11px 0", fontSize: 13, fontWeight: 700, color: "#0B0B0C", textAlign: "center" }}>I'm In</div>
+            </a>
+            {onRemove && (
+              <button onClick={onRemove}
+                style={{ width: "20%", flexShrink: 0, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <X size={14} color="rgba(255,255,255,0.4)" strokeWidth={2} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TestSavedScreen({ sessions }: { sessions: Session[] }) {
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const [sort, setSort] = useState<"match" | "wait" | "friends">("match");
+  const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const visibleSessions = sessions.filter(s => !removedIds.has(s.id));
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const approxCard = scrollRef.current.offsetWidth * 0.84 + 10;
+    setCarouselIdx(Math.min(Math.round(scrollRef.current.scrollLeft / approxCard), visibleSessions.length - 1));
+  };
+  const handleRemove = (id: number) => setRemovedIds(prev => new Set([...prev, id]));
+
+  const SORT_LABELS: Record<string, string> = { match: "Best match", wait: "Wait time", friends: "Friends" };
+
+  return (
+    <div style={{ padding: "0 16px" }}>
+      {/* Header */}
+      <div style={{ padding: "16px 0 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 }}>Saved</div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: "#fff", margin: 0 }}>Your shortlist</h1>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.2)", borderRadius: 20, padding: "4px 10px", fontSize: 12, fontWeight: 600, color: A }}>{ME.dupr}</div>
+          <PhotoAvatar initials={ME.avatar} size={34} fallbackBg={A} fallbackColor="#000" />
+        </div>
+      </div>
+
+      {/* Sort pills */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {(["match", "wait", "friends"] as const).map(s2 => {
+          const on = sort === s2;
+          return (
+            <button key={s2} onClick={() => setSort(s2)}
+              style={{ padding: "8px 16px", borderRadius: 20, fontSize: 12, fontWeight: on ? 600 : 400, cursor: "pointer", fontFamily: "inherit",
+                background: on ? A : "rgba(255,255,255,0.04)", color: on ? "#0B0B0C" : "rgba(255,255,255,0.4)",
+                border: on ? "none" : "1px solid rgba(255,255,255,0.08)" }}>
+              {SORT_LABELS[s2]}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Carousel */}
+      <div ref={scrollRef} onScroll={handleScroll}
+        style={{ display: "flex", gap: 12, marginLeft: -16, paddingLeft: 16, marginRight: -16, paddingRight: 16, overflowX: "auto", scrollSnapType: "x mandatory", scrollbarWidth: "none", alignItems: "stretch" } as React.CSSProperties}>
+        {visibleSessions.length > 0 ? visibleSessions.map((sess, i) => (
+          <TestCarouselCard key={sess.id} s={sess} isBestMatch={i === 0} onRemove={() => handleRemove(sess.id)} />
+        )) : (
+          <div style={{ padding: "48px 0", color: "rgba(255,255,255,0.3)", fontSize: 13 }}>No saved sessions yet.</div>
         )}
       </div>
 
-      {/* Action buttons */}
-      {!isDone && current && (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 28, paddingBottom: 12 }}>
-          <button onClick={() => triggerExit("skip")} disabled={isExiting}
-            style={{ width: 58, height: 58, borderRadius: "50%", background: "#1a1a1a", border: "1.5px solid #2a2a2a", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.4 : 1 }}>
-            <X size={24} color="#777" strokeWidth={2} />
-          </button>
-          <button onClick={handleUndo} disabled={!canUndo}
-            style={{ width: 52, height: 52, borderRadius: "50%", background: "#1a1a1a", border: "1.5px solid #2a2a2a", display: "flex", alignItems: "center", justifyContent: "center", cursor: canUndo ? "pointer" : "default", opacity: canUndo ? 1 : 0.35, transition: "opacity 0.2s" }}>
-            <RotateCcw size={18} color="#888" strokeWidth={2} />
-          </button>
-          <button onClick={() => triggerExit("join")} disabled={isExiting}
-            style={{ width: 64, height: 64, borderRadius: "50%", background: A, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.5 : 1, boxShadow: "0 0 36px rgba(245,166,35,0.25), 0 4px 16px rgba(245,166,35,0.3)" }}>
-            <Heart size={28} color="#0B0B0C" fill="#0B0B0C" strokeWidth={2} />
-          </button>
+      {/* Dots */}
+      {visibleSessions.length > 1 && (
+        <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 16 }}>
+          {visibleSessions.map((_, i) => (
+            <div key={i} style={{ height: 5, width: i === carouselIdx ? 14 : 5, borderRadius: 3, background: i === carouselIdx ? A : "rgba(255,255,255,0.1)", transition: "all 0.2s" }} />
+          ))}
         </div>
       )}
     </div>
@@ -1306,6 +1500,9 @@ export default function App() {
 
         {/* ── TEST TAB ── */}
         {activeTab === "test" && <TestScreen />}
+
+        {/* ── TEST SAVED TAB ── */}
+        {activeTab === "testsaved" && <TestSavedScreen sessions={savedSessions} />}
 
       {/* Bottom nav */}
       <BottomNav active={activeTab} onSelect={setActiveTab} savedCount={savedCount} />
