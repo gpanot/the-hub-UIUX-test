@@ -512,8 +512,8 @@ function BottomNav({ active, onSelect, savedCount }: { active: TabId; onSelect: 
     // { id: "swipe", icon: <Layers   size={18} strokeWidth={1.5} />, label: "Swipe" },
     // { id: "saved", icon: <Bookmark size={18} strokeWidth={1.5} />, label: "Saved", badge: savedCount },
     { id: "scene", icon: <MapPin   size={18} strokeWidth={1.5} />, label: "Around Me" },
-    { id: "test",  icon: <Sparkles size={18} strokeWidth={1.5} />, label: "Test" },
-    { id: "testsaved", icon: <Heart size={18} strokeWidth={1.5} />, label: "Test Saved" },
+    { id: "test",  icon: <Sparkles size={18} strokeWidth={1.5} />, label: "Happening" },
+    { id: "testsaved", icon: <Heart size={18} strokeWidth={1.5} />, label: "Shortlist" },
   ];
   return (
     <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "#0a0a0a", borderTop: "0.5px solid #1e1e1e", display: "flex", zIndex: 200, paddingBottom: "env(safe-area-inset-bottom, 0px)", height: "calc(64px + env(safe-area-inset-bottom, 0px))" }}>
