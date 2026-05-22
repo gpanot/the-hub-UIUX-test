@@ -1440,24 +1440,20 @@ function Test2SwipeCard({ s, isExiting, exitDir, onAction, onExited }: {
   );
 }
 
-function Test2Screen() {
-  const [testFilter, setTestFilter] = useState<TestFilterId>("foryou");
+function Test2Screen({ onNavigateToShortlist }: { onNavigateToShortlist?: () => void }) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [history, setHistory] = useState<Array<{ idx: number; action: SwipeAction }>>([]);
   const [isExiting, setIsExiting] = useState(false);
   const [exitDir, setExitDir] = useState<SwipeAction>("join");
   const [showOverlay, setShowOverlay] = useState(false);
 
-  const deck = ALL_SESSIONS.filter(s => {
-    if (testFilter === "competitive") return s.vibe === "Intense" || s.duprRange.avg >= 3.5;
-    if (testFilter === "friends") return s.friendCount > 0;
-    return true;
-  });
-
-  const isDone = currentIdx >= deck.length;
+  const deck = ALL_SESSIONS;
+  const total = deck.length;
+  const isDone = currentIdx >= total;
   const current = deck[currentIdx];
   const upNext = deck.slice(currentIdx + 1, currentIdx + 4);
   const canUndo = history.length > 0 && !isExiting;
+  const progressIdx = Math.min(currentIdx, total);
 
   const triggerExit = (action: SwipeAction) => {
     if (isExiting) return;
@@ -1466,8 +1462,12 @@ function Test2Screen() {
   const handleAction = (_action: SwipeAction) => {};
   const handleExited = () => {
     setHistory(prev => [...prev, { idx: currentIdx, action: exitDir }]);
-    setCurrentIdx(prev => prev + 1);
+    const nextIdx = currentIdx + 1;
+    setCurrentIdx(nextIdx);
     setIsExiting(false);
+    if (nextIdx >= total && onNavigateToShortlist) {
+      setTimeout(onNavigateToShortlist, 400);
+    }
   };
   const handleUndo = () => {
     if (!canUndo) return;
@@ -1477,32 +1477,30 @@ function Test2Screen() {
   };
   const handleReload = () => { setCurrentIdx(0); setHistory([]); setIsExiting(false); };
 
-  useEffect(() => { setCurrentIdx(0); setHistory([]); setIsExiting(false); }, [testFilter]);
-
   return (
     <div style={{ padding: "0 16px" }}>
       <TopBar title="Where to play?" onAvatarTap={() => setShowOverlay(true)} />
       {showOverlay && <OverlaySettingsSheet onClose={() => setShowOverlay(false)} />}
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 12, width: "100%" }}>
-        {TEST_FILTERS.map(f => {
-          const on = testFilter === f.id;
-          return (
-            <button key={f.id} onClick={() => setTestFilter(f.id)}
-              style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 14px", borderRadius: 20, flexShrink: 0, fontSize: 12, fontWeight: on ? 600 : 400, cursor: "pointer", fontFamily: "inherit",
-                background: on ? A : IN, color: on ? "#000" : MU, border: `1px solid ${on ? A : BD}` }}>
-              <span style={{ color: on ? "#000" : A, display: "flex" }}>{f.icon}</span>
-              {f.label}
-            </button>
-          );
-        })}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 0 12px", width: "100%" }}>
+        <span style={{ fontSize: 11, color: "#666", fontWeight: 400 }}>{progressIdx} of {total} Selected</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          {deck.map((_, i) => (
+            <div key={i} style={{
+              width: i < progressIdx ? 14 : 5, height: 5,
+              borderRadius: i < progressIdx ? 3 : "50%",
+              background: i < progressIdx ? A : "#2a2a2a",
+              transition: "all 0.25s ease",
+            }} />
+          ))}
+        </div>
       </div>
 
       {isDone ? (
         <div style={{ textAlign: "center", padding: "56px 0" }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🏓</div>
           <p style={{ fontSize: 15, color: "rgba(255,255,255,0.35)", marginBottom: 24 }}>
-            {deck.length === 0 ? "No games match this filter." : "You've seen all games tonight."}
+            You&apos;ve seen all games tonight.
           </p>
           <button onClick={handleReload}
             style={{ display: "inline-flex", alignItems: "center", gap: 8, background: A, border: "none", borderRadius: 14, padding: "12px 28px", fontSize: 14, fontWeight: 700, color: "#0B0B0C", cursor: "pointer", fontFamily: "inherit" }}>
@@ -1511,7 +1509,7 @@ function Test2Screen() {
         </div>
       ) : current && (
         <>
-          <div style={{ position: "relative", marginBottom: 12, height: "min(601px, 67.2vh)", width: "100%" }}>
+          <div style={{ position: "relative", marginBottom: 12, height: "min(631px, 70.6vh)", width: "100%" }}>
             {deck[currentIdx + 2] && (
               <motion.div animate={isExiting ? { opacity: 0.3 } : { opacity: 0.12 }} transition={{ duration: 0.3 }}
                 style={{ position: "absolute", top: 8, left: 12, right: 12, bottom: -4, background: "rgba(30,30,30,0.6)", borderRadius: 28, zIndex: 0, pointerEvents: "none" }} />
@@ -1910,7 +1908,7 @@ export default function App() {
         {activeTab === "test" && <TestScreen />}
 
         {/* ── TEST2 TAB ── */}
-        {activeTab === "test2" && <Test2Screen />}
+        {activeTab === "test2" && <Test2Screen onNavigateToShortlist={() => setActiveTab("test2saved")} />}
 
         {/* ── TEST SAVED TAB ── */}
         {activeTab === "testsaved" && <TestSavedScreen sessions={savedSessions} />}
