@@ -467,12 +467,12 @@ function SecondaryCard({ s }: { s: Session }) {
 }
 
 /* ── Shared top bar (sticky) ───────────────────────────────── */
-function TopBar({ subtitle, title, size = 20 }: { subtitle: string; title: string; size?: number }) {
+function TopBar({ subtitle, title, size = 20 }: { subtitle?: string; title: string; size?: number }) {
   return (
-    <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#0a0a0a", padding: "16px 16px 12px", marginLeft: -16, marginRight: -16 }}>
+    <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#0a0a0a", padding: subtitle ? "16px 16px 12px" : "12px 16px 10px", marginLeft: -16, marginRight: -16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <div style={{ fontSize: 11, color: MU, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 }}>{subtitle}</div>
+          {subtitle && <div style={{ fontSize: 11, color: MU, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 }}>{subtitle}</div>}
           <div style={{ fontSize: size, fontWeight: 600, color: "#fff" }}>{title}</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -494,7 +494,7 @@ function BottomNav({ active, onSelect, savedCount }: { active: TabId; onSelect: 
     { id: "testsaved", icon: <Heart size={18} strokeWidth={1.5} />, label: "Test Saved" },
   ];
   return (
-    <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, height: 64, background: "#0a0a0a", borderTop: "0.5px solid #1e1e1e", display: "flex", zIndex: 200 }}>
+    <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "#0a0a0a", borderTop: "0.5px solid #1e1e1e", display: "flex", zIndex: 200, paddingBottom: "env(safe-area-inset-bottom, 0px)", height: "calc(64px + env(safe-area-inset-bottom, 0px))" }}>
       {tabs.map(t => {
         const on = active === t.id;
         return (
@@ -869,7 +869,7 @@ function TestCardContent({ s, onShortlist }: { s: Session; onShortlist?: () => v
   else vibeTags.push({ icon: <Zap size={13} strokeWidth={1.8} color={A} />, label: "Intense" });
 
   return (
-    <div style={{ position: "relative", borderRadius: 28, overflow: "hidden", height: "100%", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 0 0 0.5px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4)" }}>
+    <div style={{ position: "relative", borderRadius: 28, overflow: "hidden", height: "100%", width: "100%", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 0 0 0.5px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4)" }}>
       <CardBgRotator />
 
       {/* Cinematic layered overlays */}
@@ -882,69 +882,69 @@ function TestCardContent({ s, onShortlist }: { s: Session; onShortlist?: () => v
       {/* Subtle vignette */}
       <div style={{ position: "absolute", inset: 0, boxShadow: "inset 0 0 80px 20px rgba(0,0,0,0.35)", zIndex: 1, pointerEvents: "none" }} />
 
-      <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", padding: "18px 22px 24px" }}>
+      <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", padding: "16px 16px 20px", width: "100%" }}>
 
         {/* Top row: Tonight + time ... distance (right) */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "auto" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(246,185,59,0.12)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(246,185,59,0.18)", borderRadius: 20, padding: "5px 14px", fontSize: 12, fontWeight: 600, color: A }}>
-            <Clock size={12} strokeWidth={2} />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "auto", width: "100%" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(246,185,59,0.12)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(246,185,59,0.18)", borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 600, color: A, flexShrink: 0 }}>
+            <Clock size={11} strokeWidth={2} />
             Tonight
           </span>
-          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.65)" }}>{s.time}</span>
-          <span style={{ flex: 1 }} />
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, color: "rgba(255,255,255,0.65)" }}>
-            <MapPin size={12} strokeWidth={1.5} />
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", flexShrink: 0 }}>{s.time}</span>
+          <span style={{ flex: 1, minWidth: 0 }} />
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: "rgba(255,255,255,0.65)", flexShrink: 0 }}>
+            <MapPin size={11} strokeWidth={1.5} />
             {distance}
           </span>
         </div>
 
-        {/* Title block — truncated to 2 lines */}
-        <h2 style={{ fontSize: 34, fontWeight: 800, color: "#fff", lineHeight: 1.15, margin: "0 0 8px", maxWidth: "70%", textShadow: "0 2px 20px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.3)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+        {/* Title block — fluid sizing, 2 lines max */}
+        <h2 style={{ fontSize: "clamp(24px, 6vw, 32px)", fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: "0 0 6px", width: "100%", textShadow: "0 2px 20px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.3)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {s.name}
         </h2>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-          <Layers size={13} color="rgba(255,255,255,0.55)" strokeWidth={1.5} />
-          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>{price}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, width: "100%" }}>
+          <Layers size={12} color="rgba(255,255,255,0.55)" strokeWidth={1.5} />
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>{price}</span>
         </div>
 
-        {/* Match badge — overlaps image/content boundary */}
-        <div style={{ marginTop: 4, marginBottom: 20, position: "relative", zIndex: 3 }}>
+        {/* Match badge */}
+        <div style={{ marginTop: 2, marginBottom: 14, position: "relative", zIndex: 3 }}>
           <MatchBadge pct={s.matchScore} />
         </div>
 
         {/* Social proof — 3 avatars + "+N" */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
-          <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, width: "100%", minWidth: 0 }}>
+          <div style={{ display: "flex", flexShrink: 0 }}>
             {allAvatars.map((p, i) => (
-              <PhotoAvatar key={p.avatar} initials={p.avatar} size={34} fallbackBg="#333"
-                style={{ border: "2px solid rgba(11,11,12,0.8)", marginLeft: i > 0 ? -10 : 0, position: "relative", zIndex: 6 - i }} />
+              <PhotoAvatar key={p.avatar} initials={p.avatar} size={30} fallbackBg="#333"
+                style={{ border: "2px solid rgba(11,11,12,0.8)", marginLeft: i > 0 ? -8 : 0, position: "relative", zIndex: 6 - i }} />
             ))}
             {remaining > 0 && (
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "2px solid rgba(11,11,12,0.8)", marginLeft: -10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.45)", position: "relative", zIndex: 0, backdropFilter: "blur(8px)" }}>
+              <div style={{ width: 30, height: 30, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "2px solid rgba(11,11,12,0.8)", marginLeft: -8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.45)", position: "relative", zIndex: 0, backdropFilter: "blur(8px)" }}>
                 +{remaining}
               </div>
             )}
           </div>
-          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.4, minWidth: 0 }}>
             {friends.length > 0 ? `${friends[0].name} +${Math.max(1, friends.length - 1)} friends` : `${s.filled} players`}
             <br />
-            joining <Heart size={12} fill="rgba(220,170,60,0.8)" color="rgba(220,170,60,0.8)" strokeWidth={0} style={{ display: "inline", verticalAlign: "-1px" }} />
+            joining <Heart size={11} fill="rgba(220,170,60,0.8)" color="rgba(220,170,60,0.8)" strokeWidth={0} style={{ display: "inline", verticalAlign: "-1px" }} />
           </span>
         </div>
 
-        {/* Tags */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 22 }}>
+        {/* Tags — flex-wrap for small screens */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16, width: "100%" }}>
           {vibeTags.map((t, i) => (
-            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(246,185,59,0.06)", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 500, color: "rgba(220,170,60,0.9)", border: "none" }}>
+            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(246,185,59,0.06)", borderRadius: 20, padding: "5px 12px", fontSize: 11, fontWeight: 500, color: "rgba(220,170,60,0.9)", flexShrink: 1, minWidth: 0 }}>
               {t.icon} {t.label}
             </span>
           ))}
         </div>
 
-        {/* CTA — with ambient glow */}
-        <button onClick={onShortlist} style={{ position: "relative", width: "100%", background: A, border: "none", borderRadius: 18, padding: "16px 20px", cursor: "pointer", fontFamily: "inherit", fontSize: 17, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 0 40px rgba(245,166,35,0.2), 0 4px 20px rgba(245,166,35,0.25)" }}>
+        {/* CTA — full width, fluid */}
+        <button onClick={onShortlist} style={{ width: "100%", background: A, border: "none", borderRadius: 18, padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", fontSize: 16, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 0 40px rgba(245,166,35,0.2), 0 4px 20px rgba(245,166,35,0.25)" }}>
           <span style={{ flex: 1, textAlign: "center" }}>Shortlist</span>
-          <ArrowRight size={20} strokeWidth={2.5} />
+          <ArrowRight size={18} strokeWidth={2.5} />
         </button>
       </div>
     </div>
@@ -1077,10 +1077,10 @@ function TestScreen() {
 
   return (
     <div style={{ padding: "0 16px" }}>
-      <TopBar subtitle="Exciting" title="Find your game" />
+      <TopBar title="Find your game" />
 
       {/* Filter pills */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, width: "100%" }}>
         {TEST_FILTERS.map(f => {
           const on = testFilter === f.id;
           return (
@@ -1111,7 +1111,7 @@ function TestScreen() {
       ) : current && (
         <>
           {/* Card stack */}
-          <div style={{ position: "relative", marginBottom: 16, height: "min(520px, 58vh)" }}>
+          <div style={{ position: "relative", marginBottom: 12, height: "min(520px, 58vh)", width: "100%" }}>
             {deck[currentIdx + 2] && (
               <motion.div animate={isExiting ? { opacity: 0.3 } : { opacity: 0.12 }} transition={{ duration: 0.3 }}
                 style={{ position: "absolute", top: 8, left: 12, right: 12, bottom: -4, background: "rgba(30,30,30,0.6)", borderRadius: 28, zIndex: 0, pointerEvents: "none" }} />
@@ -1178,7 +1178,7 @@ function TestCarouselCard({ s, isBestMatch, onRemove }: { s: Session; isBestMatc
   if (s.vibe === "Social" || s.vibe === "Chill") vibeTags.push({ icon: <Wine size={12} strokeWidth={1.8} color={A} />, label: "Social vibe" });
 
   return (
-    <div style={{ width: "84vw", maxWidth: 360, flexShrink: 0, scrollSnapAlign: "start", display: "flex", flexDirection: "column", height: "calc(100dvh - 200px)" }}>
+    <div style={{ width: "84vw", maxWidth: 360, flexShrink: 0, scrollSnapAlign: "start", display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ position: "relative", borderRadius: 24, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)", flex: 1, display: "flex", flexDirection: "column" }}>
         <CardBgRotator />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.08) 45%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.92) 80%)", zIndex: 1 }} />
@@ -1260,52 +1260,44 @@ function TestSavedScreen({ sessions }: { sessions: Session[] }) {
   const SORT_LABELS: Record<string, string> = { match: "Best match", wait: "Wait time", friends: "Friends" };
 
   return (
-    <div style={{ padding: "0 16px" }}>
-      {/* Header */}
-      <div style={{ padding: "16px 0 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 }}>Saved</div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: "#fff", margin: 0 }}>Your shortlist</h1>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.2)", borderRadius: 20, padding: "4px 10px", fontSize: 12, fontWeight: 600, color: A }}>{ME.dupr}</div>
-          <PhotoAvatar initials={ME.avatar} size={34} fallbackBg={A} fallbackColor="#000" />
-        </div>
-      </div>
+    <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", height: "calc(100dvh - 64px)" }}>
+      <TopBar title="Your shortlist" />
 
       {/* Sort pills */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexShrink: 0 }}>
         {(["match", "wait", "friends"] as const).map(s2 => {
           const on = sort === s2;
           return (
             <button key={s2} onClick={() => setSort(s2)}
-              style={{ padding: "8px 16px", borderRadius: 20, fontSize: 12, fontWeight: on ? 600 : 400, cursor: "pointer", fontFamily: "inherit",
-                background: on ? A : "rgba(255,255,255,0.04)", color: on ? "#0B0B0C" : "rgba(255,255,255,0.4)",
-                border: on ? "none" : "1px solid rgba(255,255,255,0.08)" }}>
+              style={{ padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: on ? 600 : 400, cursor: "pointer", fontFamily: "inherit",
+                background: on ? A : IN, color: on ? "#000" : MU,
+                border: `1px solid ${on ? A : BD}` }}>
               {SORT_LABELS[s2]}
             </button>
           );
         })}
       </div>
 
-      {/* Carousel */}
-      <div ref={scrollRef} onScroll={handleScroll}
-        style={{ display: "flex", gap: 12, marginLeft: -16, paddingLeft: 16, marginRight: -16, paddingRight: 16, overflowX: "auto", scrollSnapType: "x mandatory", scrollbarWidth: "none", alignItems: "stretch" } as React.CSSProperties}>
-        {visibleSessions.length > 0 ? visibleSessions.map((sess, i) => (
-          <TestCarouselCard key={sess.id} s={sess} isBestMatch={i === 0} onRemove={() => handleRemove(sess.id)} />
-        )) : (
-          <div style={{ padding: "48px 0", color: "rgba(255,255,255,0.3)", fontSize: 13 }}>No saved sessions yet.</div>
+      {/* Carousel + dots — fill remaining height */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <div ref={scrollRef} onScroll={handleScroll}
+          style={{ flex: 1, display: "flex", gap: 12, marginLeft: -16, paddingLeft: 16, marginRight: -16, paddingRight: 16, overflowX: "auto", scrollSnapType: "x mandatory", scrollbarWidth: "none", alignItems: "stretch" } as React.CSSProperties}>
+          {visibleSessions.length > 0 ? visibleSessions.map((sess, i) => (
+            <TestCarouselCard key={sess.id} s={sess} isBestMatch={i === 0} onRemove={() => handleRemove(sess.id)} />
+          )) : (
+            <div style={{ padding: "48px 0", color: "rgba(255,255,255,0.3)", fontSize: 13 }}>No saved sessions yet.</div>
+          )}
+        </div>
+
+        {/* Dots */}
+        {visibleSessions.length > 1 && (
+          <div style={{ display: "flex", justifyContent: "center", gap: 6, padding: "12px 0", flexShrink: 0 }}>
+            {visibleSessions.map((_, i) => (
+              <div key={i} style={{ height: 5, width: i === carouselIdx ? 14 : 5, borderRadius: 3, background: i === carouselIdx ? A : "rgba(255,255,255,0.1)", transition: "all 0.2s" }} />
+            ))}
+          </div>
         )}
       </div>
-
-      {/* Dots */}
-      {visibleSessions.length > 1 && (
-        <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 16 }}>
-          {visibleSessions.map((_, i) => (
-            <div key={i} style={{ height: 5, width: i === carouselIdx ? 14 : 5, borderRadius: 3, background: i === carouselIdx ? A : "rgba(255,255,255,0.1)", transition: "all 0.2s" }} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -1398,7 +1390,7 @@ export default function App() {
         {/* ── SWIPE TAB ── */}
         {activeTab === "swipe" && (
           <div style={{ padding: "0 16px" }}>
-            <TopBar subtitle="Exciting" title="Find your game" />
+            <TopBar title="Find your game" />
 
             {/* Filters */}
             <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
@@ -1416,11 +1408,11 @@ export default function App() {
             {/* Progress row + bar */}
             {!isDone && totalCards > 0 && (
               <>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", width: "100%", marginBottom: 6 }}>
                   <span style={{ fontSize: 10, color: "#555" }}>Card {currentCardN} of {totalCards}</span>
                   <span style={{ fontSize: 10, color: A, fontWeight: 500 }}>{savedCount} saved</span>
                 </div>
-                <div style={{ height: 3, background: "#1a1a1a", borderRadius: 2, marginBottom: 16 }}>
+                <div style={{ height: 3, background: "#1a1a1a", borderRadius: 2, marginBottom: 16, width: "100%" }}>
                   <div style={{ width: `${progressPct}%`, height: "100%", background: A, borderRadius: 2, transition: "width 0.3s" }} />
                 </div>
               </>
