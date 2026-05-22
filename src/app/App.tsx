@@ -831,10 +831,10 @@ function MatchBadge({ pct }: { pct: number }) {
   const r = 42, c = 2 * Math.PI * r, dash = (pct / 100) * c;
   const softAmber = "rgba(220,170,60,0.85)";
   return (
-    <div style={{ position: "relative", width: 140, height: 130, flexShrink: 0, borderRadius: 24, overflow: "hidden" }}>
+    <div style={{ position: "relative", width: 110, height: 110, flexShrink: 0, borderRadius: 20, overflow: "hidden" }}>
       {/* Transparent frosted glass */}
-      <div style={{ position: "absolute", inset: 0, borderRadius: 24, background: "rgba(255,255,255,0.05)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.1)" }} />
-      <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: "12px 16px" }}>
+      <div style={{ position: "absolute", inset: 0, borderRadius: 20, background: "rgba(255,255,255,0.025)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)" }} />
+      <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: "6px" }}>
         <div style={{ position: "relative", width: 96, height: 96 }}>
           <svg width={96} height={96} viewBox="0 0 96 96" style={{ transform: "rotate(-90deg)" }}>
             <circle cx={48} cy={48} r={r} fill="none" stroke="rgba(220,170,60,0.1)" strokeWidth={2} />
