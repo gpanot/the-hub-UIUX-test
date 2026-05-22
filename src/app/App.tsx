@@ -1336,10 +1336,18 @@ function Test2CardContent({ s, onJoin }: { s: Session; onJoin?: () => void }) {
           </div>
 
           <div style={{ marginTop: 12, position: "relative", zIndex: 2 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, background: "rgba(255,255,255,0.06)", borderRadius: 12, padding: "10px 14px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <Zap size={20} color={A} strokeWidth={2} style={{ flexShrink: 0 }} />
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Competitive</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "12px 16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: "50%", flexShrink: 0,
+                  background: "radial-gradient(circle, rgba(245,166,35,0.18) 0%, rgba(20,18,12,0.85) 70%)",
+                  border: "1.5px solid rgba(245,166,35,0.45)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 0 12px rgba(245,166,35,0.25), inset 0 0 8px rgba(245,166,35,0.1)",
+                }}>
+                  <Zap size={20} color={A} strokeWidth={2.5} fill="rgba(245,166,35,0.35)" />
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Competitive</div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flexShrink: 0 }}>
                 <div style={{ display: "flex" }}>
