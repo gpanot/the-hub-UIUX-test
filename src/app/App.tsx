@@ -851,7 +851,7 @@ function MatchBadge({ pct }: { pct: number }) {
   );
 }
 
-function TestCardContent({ s }: { s: Session }) {
+function TestCardContent({ s, onShortlist }: { s: Session; onShortlist?: () => void }) {
   const friends = s.players.filter(p => p.isFriend);
   const allAvatars = s.players.slice(0, 3);
   const friendLine = friends.length > 0
@@ -898,9 +898,9 @@ function TestCardContent({ s }: { s: Session }) {
           </span>
         </div>
 
-        {/* Title block — first word on line 1, rest on line 2 */}
-        <h2 style={{ fontSize: 34, fontWeight: 800, color: "#fff", lineHeight: 1.15, margin: "0 0 8px", maxWidth: "70%", textShadow: "0 2px 20px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.3)" }}>
-          {s.name.split(" ")[0]}<br />{s.name.split(" ").slice(1).join(" ")}
+        {/* Title block — truncated to 2 lines */}
+        <h2 style={{ fontSize: 34, fontWeight: 800, color: "#fff", lineHeight: 1.15, margin: "0 0 8px", maxWidth: "70%", textShadow: "0 2px 20px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.3)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          {s.name}
         </h2>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
           <Layers size={13} color="rgba(255,255,255,0.55)" strokeWidth={1.5} />
@@ -942,8 +942,8 @@ function TestCardContent({ s }: { s: Session }) {
         </div>
 
         {/* CTA — with ambient glow */}
-        <button style={{ position: "relative", width: "100%", background: A, border: "none", borderRadius: 18, padding: "16px 20px", cursor: "pointer", fontFamily: "inherit", fontSize: 17, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 0 40px rgba(245,166,35,0.2), 0 4px 20px rgba(245,166,35,0.25)" }}>
-          <span style={{ flex: 1, textAlign: "center" }}>I'm In</span>
+        <button onClick={onShortlist} style={{ position: "relative", width: "100%", background: A, border: "none", borderRadius: 18, padding: "16px 20px", cursor: "pointer", fontFamily: "inherit", fontSize: 17, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 0 40px rgba(245,166,35,0.2), 0 4px 20px rgba(245,166,35,0.25)" }}>
+          <span style={{ flex: 1, textAlign: "center" }}>Shortlist</span>
           <ArrowRight size={20} strokeWidth={2.5} />
         </button>
       </div>
@@ -1001,7 +1001,7 @@ function TestSwipeCard({ s, isExiting, exitDir, onAction, onExited }: {
       <motion.div style={{ position: "absolute", top: 60, left: 20, zIndex: 20, pointerEvents: "none", opacity: skipOp, background: "rgba(60,60,60,0.4)", border: "1.5px solid #444", borderRadius: 12, padding: "6px 16px" }}>
         <span style={{ color: "#888", fontSize: 14, fontWeight: 700 }}>PASS ✕</span>
       </motion.div>
-      <TestCardContent s={s} />
+      <TestCardContent s={s} onShortlist={() => { if (!exitingRef.current) { exitingRef.current = true; onAction("join"); controls.start({ x: 520, opacity: 0, transition: { duration: 0.32, ease: [0.4, 0, 0.2, 1] } }).then(onExited); } }} />
     </motion.div>
   );
 }
@@ -1077,27 +1077,20 @@ function TestScreen() {
 
   return (
     <div style={{ padding: "0 16px" }}>
-      {/* Header */}
-      <div style={{ padding: "16px 0 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: "#fff", margin: 0 }}>Find your game</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.2)", borderRadius: 20, padding: "4px 10px", fontSize: 12, fontWeight: 600, color: A }}>{ME.dupr}</div>
-          <PhotoAvatar initials={ME.avatar} size={34} fallbackBg={A} fallbackColor="#000" />
-        </div>
-      </div>
+      <TopBar subtitle="Exciting" title="Find your game" />
 
       {/* Filter pills */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
         {TEST_FILTERS.map(f => {
           const on = testFilter === f.id;
           return (
             <button key={f.id} onClick={() => setTestFilter(f.id)}
-              style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 24, fontSize: 13, fontWeight: on ? 600 : 400, cursor: "pointer", fontFamily: "inherit",
-                background: on ? A : "rgba(255,255,255,0.04)",
-                color: on ? "#0B0B0C" : "rgba(255,255,255,0.4)",
-                border: on ? "none" : "1px solid rgba(255,255,255,0.08)",
+              style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 14px", borderRadius: 20, flexShrink: 0, fontSize: 12, fontWeight: on ? 600 : 400, cursor: "pointer", fontFamily: "inherit",
+                background: on ? A : IN,
+                color: on ? "#000" : MU,
+                border: `1px solid ${on ? A : BD}`,
               }}>
-              <span style={{ color: on ? "#0B0B0C" : "rgba(255,255,255,0.35)", display: "flex" }}>{f.icon}</span>
+              <span style={{ color: on ? "#000" : A, display: "flex" }}>{f.icon}</span>
               {f.label}
             </button>
           );
@@ -1185,13 +1178,13 @@ function TestCarouselCard({ s, isBestMatch, onRemove }: { s: Session; isBestMatc
   if (s.vibe === "Social" || s.vibe === "Chill") vibeTags.push({ icon: <Wine size={12} strokeWidth={1.8} color={A} />, label: "Social vibe" });
 
   return (
-    <div style={{ minWidth: 290, width: "84vw", maxWidth: 360, flexShrink: 0, scrollSnapAlign: "start", display: "flex", flexDirection: "column" }}>
+    <div style={{ width: "84vw", maxWidth: 360, flexShrink: 0, scrollSnapAlign: "start", display: "flex", flexDirection: "column", height: "calc(100dvh - 200px)" }}>
       <div style={{ position: "relative", borderRadius: 24, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)", flex: 1, display: "flex", flexDirection: "column" }}>
         <CardBgRotator />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.08) 45%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.92) 80%)", zIndex: 1 }} />
         <div style={{ position: "absolute", inset: 0, background: "rgba(246,185,59,0.04)", zIndex: 1 }} />
 
-        <div style={{ position: "relative", zIndex: 2, flex: 1, display: "flex", flexDirection: "column", padding: "14px 16px 16px" }}>
+        <div style={{ position: "relative", zIndex: 2, flex: 1, display: "flex", flexDirection: "column", padding: "14px 16px 16px", overflow: "hidden" }}>
           {/* Top pills */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "auto" }}>
             <span style={{ background: "rgba(246,185,59,0.12)", backdropFilter: "blur(12px)", borderRadius: 16, padding: "3px 10px", fontSize: 10, fontWeight: 600, color: A }}>Tonight</span>
