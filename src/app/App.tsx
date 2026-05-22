@@ -828,23 +828,25 @@ const SESSION_PRICE: Record<number, string> = {
 };
 
 function MatchBadge({ pct }: { pct: number }) {
-  const r = 50, c = 2 * Math.PI * r, dash = (pct / 100) * c;
+  const r = 42, c = 2 * Math.PI * r, dash = (pct / 100) * c;
   const softAmber = "rgba(220,170,60,0.85)";
   return (
-    <div style={{ position: "relative", width: 120, height: 120, flexShrink: 0 }}>
-      {/* Soft diffused glow */}
-      <div style={{ position: "absolute", inset: -20, borderRadius: "50%", background: "radial-gradient(circle, rgba(220,170,60,0.1) 0%, transparent 60%)", filter: "blur(12px)" }} />
-      {/* Frosted glass */}
-      <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "rgba(15,15,18,0.45)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }} />
-      <svg width={120} height={120} viewBox="0 0 120 120" style={{ position: "relative", transform: "rotate(-90deg)" }}>
-        <circle cx={60} cy={60} r={r} fill="none" stroke="rgba(220,170,60,0.08)" strokeWidth={1.5} />
-        <circle cx={60} cy={60} r={r} fill="none" stroke={softAmber} strokeWidth={2}
-          strokeDasharray={`${dash} ${c - dash}`} strokeLinecap="round"
-          style={{ filter: "drop-shadow(0 0 6px rgba(220,170,60,0.3))" }} />
-      </svg>
-      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: 34, fontWeight: 700, color: softAmber, lineHeight: 1 }}>{pct}<span style={{ fontSize: 18, fontWeight: 500 }}>%</span></span>
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", marginTop: 4, fontWeight: 400 }}>Great match!</span>
+    <div style={{ position: "relative", width: 140, height: 130, flexShrink: 0, borderRadius: 24, overflow: "hidden" }}>
+      {/* Transparent frosted glass */}
+      <div style={{ position: "absolute", inset: 0, borderRadius: 24, background: "rgba(255,255,255,0.05)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.1)" }} />
+      <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: "12px 16px" }}>
+        <div style={{ position: "relative", width: 96, height: 96 }}>
+          <svg width={96} height={96} viewBox="0 0 96 96" style={{ transform: "rotate(-90deg)" }}>
+            <circle cx={48} cy={48} r={r} fill="none" stroke="rgba(220,170,60,0.1)" strokeWidth={2} />
+            <circle cx={48} cy={48} r={r} fill="none" stroke={softAmber} strokeWidth={2.5}
+              strokeDasharray={`${dash} ${c - dash}`} strokeLinecap="round"
+              style={{ filter: "drop-shadow(0 0 4px rgba(220,170,60,0.25))" }} />
+          </svg>
+          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontSize: 30, fontWeight: 700, color: softAmber, lineHeight: 1 }}>{pct}<span style={{ fontSize: 16, fontWeight: 500 }}>%</span></span>
+            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", marginTop: 4, fontWeight: 400 }}>Great match!</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -853,9 +855,8 @@ function MatchBadge({ pct }: { pct: number }) {
 function TestCardContent({ s }: { s: Session }) {
   const friends = s.players.filter(p => p.isFriend);
   const allAvatars = s.players.slice(0, 3);
-  const friendLine = friends.length > 0
-    ? `${friends[0].name} + ${Math.max(1, friends.length - 1)} friends joining`
-    : `${s.filled} players joining`;
+  const friendName = friends.length > 0 ? friends[0].name : "";
+  const friendCount = Math.max(1, friends.length - 1);
   const distance = VENUE_DISTANCE[s.venue] || "3.2 km";
   const price = SESSION_PRICE[s.id] || "90k · 2h";
   const remaining = Math.max(0, s.filled - 3);
@@ -867,19 +868,22 @@ function TestCardContent({ s }: { s: Session }) {
   if (s.vibe === "Social" || s.vibe === "Chill") vibeTags.push({ icon: <Wine size={13} strokeWidth={1.8} color={A} />, label: "Social vibe" });
   else vibeTags.push({ icon: <Zap size={13} strokeWidth={1.8} color={A} />, label: "Intense" });
 
+  const titleParts = s.name.split(" ");
+  const titleLine1 = titleParts[0];
+  const titleLine2 = titleParts.slice(1).join(" ");
+
   return (
-    <div style={{ position: "relative", borderRadius: 28, overflow: "hidden", height: "100%" }}>
+    <div style={{ position: "relative", borderRadius: 28, overflow: "hidden", height: "100%", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 0 0 0.5px rgba(255,255,255,0.05)" }}>
       <CardBgRotator />
 
-      {/* Cinematic layered overlays */}
-      {/* Top overlay — darken sky/top gently */}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.15) 50%, transparent 60%)", zIndex: 1 }} />
-      {/* Bottom overlay — readable text zone */}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.1) 55%, transparent 65%)", zIndex: 1 }} />
-      {/* Warm amber atmospheric tint — subtle */}
+      {/* Top overlay — gentle sky darkening */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.1) 45%, transparent 55%)", zIndex: 1 }} />
+      {/* Warm amber tint — very subtle */}
       <div style={{ position: "absolute", inset: 0, background: "rgba(246,185,59,0.04)", zIndex: 1 }} />
-      {/* Subtle vignette */}
-      <div style={{ position: "absolute", inset: 0, boxShadow: "inset 0 0 80px 20px rgba(0,0,0,0.35)", zIndex: 1, pointerEvents: "none" }} />
+      {/* Vignette */}
+      <div style={{ position: "absolute", inset: 0, boxShadow: "inset 0 0 60px 15px rgba(0,0,0,0.3)", zIndex: 1, pointerEvents: "none" }} />
+      {/* Bottom dark panel — soft transition */}
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: "48%", background: "linear-gradient(to bottom, transparent 0%, rgba(15,15,18,0.5) 15%, rgba(15,15,18,0.85) 40%, rgba(15,15,18,0.95) 100%)", zIndex: 1 }} />
 
       <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", padding: "18px 22px 24px" }}>
 
@@ -897,47 +901,54 @@ function TestCardContent({ s }: { s: Session }) {
           </span>
         </div>
 
-        {/* Title block — overlaid on image with text-shadow blur behind */}
-        <h2 style={{ fontSize: 34, fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: "0 0 8px", maxWidth: "70%", textShadow: "0 2px 20px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.3)" }}>{s.name}</h2>
+        {/* Title — split into two lines */}
+        <div style={{ margin: "0 0 8px", maxWidth: "70%" }}>
+          <div style={{ fontSize: 36, fontWeight: 800, color: "#fff", lineHeight: 1.05, textShadow: "0 2px 16px rgba(0,0,0,0.5), 0 0 30px rgba(0,0,0,0.25)" }}>{titleLine1}</div>
+          <div style={{ fontSize: 36, fontWeight: 800, color: "#fff", lineHeight: 1.05, textShadow: "0 2px 16px rgba(0,0,0,0.5), 0 0 30px rgba(0,0,0,0.25)" }}>{titleLine2}</div>
+        </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-          <Layers size={13} color="rgba(255,255,255,0.55)" strokeWidth={1.5} />
-          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>{price}</span>
+          <Layers size={13} color="rgba(255,255,255,0.5)" strokeWidth={1.5} />
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", textShadow: "0 1px 6px rgba(0,0,0,0.35)" }}>{price}</span>
         </div>
 
-        {/* Match badge — overlaps image/content boundary */}
-        <div style={{ marginTop: 4, marginBottom: 20, position: "relative", zIndex: 3 }}>
+        {/* Match badge — overlaps image/panel boundary */}
+        <div style={{ marginTop: 4, marginBottom: 18, position: "relative", zIndex: 3 }}>
           <MatchBadge pct={s.matchScore} />
         </div>
 
         {/* Social proof — 3 avatars + "+N" */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
           <div style={{ display: "flex" }}>
             {allAvatars.map((p, i) => (
               <PhotoAvatar key={p.avatar} initials={p.avatar} size={34} fallbackBg="#333"
-                style={{ border: "2px solid rgba(11,11,12,0.8)", marginLeft: i > 0 ? -10 : 0, position: "relative", zIndex: 6 - i }} />
+                style={{ border: "2px solid rgba(15,15,18,0.9)", marginLeft: i > 0 ? -10 : 0, position: "relative", zIndex: 6 - i }} />
             ))}
             {remaining > 0 && (
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "2px solid rgba(11,11,12,0.8)", marginLeft: -10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.45)", position: "relative", zIndex: 0, backdropFilter: "blur(8px)" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(30,30,35,0.8)", border: "2px solid rgba(15,15,18,0.9)", marginLeft: -10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.55)", position: "relative", zIndex: 0 }}>
                 +{remaining}
               </div>
             )}
           </div>
-          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>
-            {friendLine} <Heart size={12} fill="rgba(220,170,60,0.8)" color="rgba(220,170,60,0.8)" strokeWidth={0} style={{ display: "inline", verticalAlign: "-1px" }} />
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>
+            {friends.length > 0 ? (
+              <>{friendName} + {friendCount} friends<br />joining <Heart size={12} fill="rgba(220,170,60,0.8)" color="rgba(220,170,60,0.8)" strokeWidth={0} style={{ display: "inline", verticalAlign: "-1px" }} /></>
+            ) : (
+              <>{s.filled} players joining <Heart size={12} fill="rgba(220,170,60,0.8)" color="rgba(220,170,60,0.8)" strokeWidth={0} style={{ display: "inline", verticalAlign: "-1px" }} /></>
+            )}
           </span>
         </div>
 
-        {/* Tags */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 22 }}>
+        {/* Tags — subtle glass border */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
           {vibeTags.map((t, i) => (
-            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(246,185,59,0.06)", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 500, color: "rgba(220,170,60,0.9)", border: "none" }}>
+            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.05)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 500, color: "rgba(220,170,60,0.9)" }}>
               {t.icon} {t.label}
             </span>
           ))}
         </div>
 
-        {/* CTA — with ambient glow */}
-        <button style={{ position: "relative", width: "100%", background: A, border: "none", borderRadius: 18, padding: "16px 20px", cursor: "pointer", fontFamily: "inherit", fontSize: 17, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 0 40px rgba(245,166,35,0.2), 0 4px 20px rgba(245,166,35,0.25)" }}>
+        {/* CTA */}
+        <button style={{ position: "relative", width: "100%", background: A, border: "none", borderRadius: 18, padding: "16px 20px", cursor: "pointer", fontFamily: "inherit", fontSize: 17, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 0 40px rgba(245,166,35,0.15), 0 4px 20px rgba(245,166,35,0.2)" }}>
           <span style={{ flex: 1, textAlign: "center" }}>I'm In</span>
           <ArrowRight size={20} strokeWidth={2.5} />
         </button>
