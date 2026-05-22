@@ -1277,9 +1277,14 @@ function Test2CardContent({ s, onJoin }: { s: Session; onJoin?: () => void }) {
     <div style={{ position: "relative", borderRadius: 28, overflow: "visible", height: "100%", width: "100%", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 0 0 0.5px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4)" }}>
       <div style={{ position: "relative", borderRadius: 28, overflow: "hidden", height: "100%", width: "100%" }}>
         <TestCardBgRotator />
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0, height: "40%",
+          pointerEvents: "none", zIndex: 1,
+          background: "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 40%, transparent 100%)",
+        }} />
         <div style={{ position: "absolute", inset: 0, background: "rgba(246,185,59,0.04)", zIndex: 2, pointerEvents: "none" }} />
 
-        <div style={{ position: "relative", zIndex: 3, height: "100%", display: "flex", flexDirection: "column", padding: "0 16px 18px", width: "100%" }}>
+        <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", padding: "0 16px 18px", width: "100%" }}>
           <div style={{ position: "absolute", top: 10, right: 10, zIndex: 20 }}>
             <MatchDialCorner pct={s.matchScore} />
           </div>
@@ -1331,12 +1336,7 @@ function Test2CardContent({ s, onJoin }: { s: Session; onJoin?: () => void }) {
             <span style={{ color: "#1D9E75" }}>Great vibes</span>
           </div>
 
-          {/* Frosted bottom panel — 12px gap from metadata strip */}
-          <div style={{
-            marginTop: 12, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
-            borderRadius: 12, padding: "10px", border: "1px solid rgba(255,255,255,0.08)",
-          }}>
-            {/* Your regulars block */}
+          <div style={{ marginTop: 12, position: "relative", zIndex: 2 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, background: "rgba(255,255,255,0.06)", borderRadius: 12, padding: "10px 12px" }}>
               <div style={{ flex: 1, display: "flex", alignItems: "flex-start", gap: 8, minWidth: 0 }}>
                 <Zap size={20} color={A} strokeWidth={2} style={{ flexShrink: 0, marginTop: 2 }} />
@@ -1361,7 +1361,7 @@ function Test2CardContent({ s, onJoin }: { s: Session; onJoin?: () => void }) {
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
               boxShadow: "0 0 32px rgba(245,166,35,0.2)",
             }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: "#1a0a00" }}>Join · {spotsLeft} spots left</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: "#1a0a00" }}>Shortlist · {spotsLeft} spots left</span>
               <span style={{ fontSize: 11, color: "rgba(0,0,0,0.5)" }}>{s.filled} / {s.totalSpots} filled</span>
             </button>
           </div>
