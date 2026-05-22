@@ -496,7 +496,6 @@ function TopBar({ subtitle, title, size = 20, onAvatarTap }: { subtitle?: string
           <div style={{ fontSize: size, fontWeight: 600, color: "#fff" }}>{title}</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ background: IN, border: `1px solid ${BD}`, borderRadius: 20, padding: "4px 10px", fontSize: 13, fontWeight: 600, color: A }}>{ME.dupr}</div>
           <div onClick={onAvatarTap} style={{ cursor: onAvatarTap ? "pointer" : "default" }}>
             <PhotoAvatar initials={ME.avatar} size={34} fallbackBg={A} fallbackColor="#000" />
           </div>
@@ -1135,7 +1134,7 @@ function TestScreen() {
 
   return (
     <div style={{ padding: "0 16px" }}>
-      <TopBar title="Find your game" onAvatarTap={() => setShowOverlay(true)} />
+      <TopBar title="Where to play?" onAvatarTap={() => setShowOverlay(true)} />
       {showOverlay && <OverlaySettingsSheet onClose={() => setShowOverlay(false)} />}
 
       {/* Filter pills */}
@@ -1337,22 +1336,19 @@ function Test2CardContent({ s, onJoin }: { s: Session; onJoin?: () => void }) {
           </div>
 
           <div style={{ marginTop: 12, position: "relative", zIndex: 2 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, background: "rgba(255,255,255,0.06)", borderRadius: 12, padding: "10px 12px" }}>
-              <div style={{ flex: 1, display: "flex", alignItems: "flex-start", gap: 8, minWidth: 0 }}>
-                <Zap size={20} color={A} strokeWidth={2} style={{ flexShrink: 0, marginTop: 2 }} />
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#fff", marginBottom: 2 }}>Competitive tonight</div>
-                  <div style={{ fontSize: 11, color: "#666" }}>Fast games · High energy</div>
-                </div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, background: "rgba(255,255,255,0.06)", borderRadius: 12, padding: "10px 14px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <Zap size={20} color={A} strokeWidth={2} style={{ flexShrink: 0 }} />
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Competitive</div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flexShrink: 0 }}>
                 <div style={{ display: "flex" }}>
                   {regulars.map((p, i) => (
                     <PhotoAvatar key={p.avatar} initials={p.avatar} size={33} fallbackBg="#333"
                       style={{ border: "1px solid rgba(255,255,255,0.2)", marginLeft: i > 0 ? -8 : 0, position: "relative", zIndex: 3 - i }} />
                   ))}
                 </div>
-                <span style={{ fontSize: 11, color: "#666", marginTop: 4, textAlign: "center" }}>Your regulars are here</span>
+                <span style={{ fontSize: 11, color: "#666", textAlign: "center" }}>Your regulars are here</span>
               </div>
             </div>
 
@@ -1474,7 +1470,7 @@ function Test2Screen() {
 
   return (
     <div style={{ padding: "0 16px" }}>
-      <TopBar title="Find your game" onAvatarTap={() => setShowOverlay(true)} />
+      <TopBar title="Where to play?" onAvatarTap={() => setShowOverlay(true)} />
       {showOverlay && <OverlaySettingsSheet onClose={() => setShowOverlay(false)} />}
 
       <div style={{ display: "flex", gap: 8, marginBottom: 12, width: "100%" }}>
@@ -1725,7 +1721,7 @@ export default function App() {
         {/* ── SWIPE TAB ── */}
         {activeTab === "swipe" && (
           <div style={{ padding: "0 16px" }}>
-            <TopBar title="Find your game" />
+            <TopBar title="Where to play?" />
 
             {/* Filters */}
             <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
