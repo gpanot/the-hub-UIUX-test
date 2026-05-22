@@ -811,34 +811,40 @@ const TEST_FILTERS: { id: TestFilterId; label: string; icon: React.ReactNode }[]
   { id: "friends", label: "Friends", icon: <Users size={13} strokeWidth={1.5} /> },
 ];
 
-const VENUE_DISTRICTS: Record<string, string> = {
-  "D9 Sports Club": "District 2",
-  "District 7 Courts": "District 7",
-  "Landmark 81": "Binh Thanh",
-  "Ben Thanh Sports": "District 1",
-  "Thao Dien Courts": "Thao Dien",
+const VENUE_DISTANCE: Record<string, string> = {
+  "D9 Sports Club": "3.2 km",
+  "District 7 Courts": "5.1 km",
+  "Landmark 81": "1.8 km",
+  "Ben Thanh Sports": "2.4 km",
+  "Thao Dien Courts": "4.3 km",
+};
+
+const SESSION_PRICE: Record<number, string> = {
+  1: "90k · 2h",
+  2: "120k · 1.5h",
+  3: "75k · 2h",
+  4: "100k · 2h",
+  5: "80k · 1.5h",
 };
 
 function MatchBadge({ pct }: { pct: number }) {
-  const r = 52, c = 2 * Math.PI * r, dash = (pct / 100) * c;
+  const r = 50, c = 2 * Math.PI * r, dash = (pct / 100) * c;
+  const softAmber = "rgba(220,170,60,0.85)";
   return (
-    <div style={{ position: "relative", width: 130, height: 130, flexShrink: 0 }}>
-      {/* Ambient glow */}
-      <div style={{ position: "absolute", inset: -16, borderRadius: "50%", background: "radial-gradient(circle, rgba(245,166,35,0.2) 0%, transparent 65%)", filter: "blur(8px)" }} />
-      {/* Frosted glass background */}
-      <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "rgba(11,11,12,0.55)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }} />
-      <svg width={130} height={130} viewBox="0 0 130 130" style={{ position: "relative", transform: "rotate(-90deg)" }}>
-        <circle cx={65} cy={65} r={r} fill="none" stroke="rgba(245,166,35,0.12)" strokeWidth={3} />
-        <circle cx={65} cy={65} r={r} fill="none" stroke={A} strokeWidth={3.5}
+    <div style={{ position: "relative", width: 120, height: 120, flexShrink: 0 }}>
+      {/* Soft diffused glow */}
+      <div style={{ position: "absolute", inset: -20, borderRadius: "50%", background: "radial-gradient(circle, rgba(220,170,60,0.1) 0%, transparent 60%)", filter: "blur(12px)" }} />
+      {/* Frosted glass */}
+      <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "rgba(15,15,18,0.45)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }} />
+      <svg width={120} height={120} viewBox="0 0 120 120" style={{ position: "relative", transform: "rotate(-90deg)" }}>
+        <circle cx={60} cy={60} r={r} fill="none" stroke="rgba(220,170,60,0.08)" strokeWidth={1.5} />
+        <circle cx={60} cy={60} r={r} fill="none" stroke={softAmber} strokeWidth={2}
           strokeDasharray={`${dash} ${c - dash}`} strokeLinecap="round"
-          style={{ filter: "drop-shadow(0 0 8px rgba(245,166,35,0.6))" }} />
+          style={{ filter: "drop-shadow(0 0 6px rgba(220,170,60,0.3))" }} />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        {/* Small star top-right */}
-        <Star size={10} fill={A} color={A} strokeWidth={0} style={{ position: "absolute", top: 22, right: 24, opacity: 0.7 }} />
-        <Star size={7} fill={A} color={A} strokeWidth={0} style={{ position: "absolute", top: 18, right: 34, opacity: 0.4 }} />
-        <span style={{ fontSize: 36, fontWeight: 700, color: A, lineHeight: 1 }}>{pct}<span style={{ fontSize: 20, fontWeight: 600 }}>%</span></span>
-        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 4 }}>Great match!</span>
+        <span style={{ fontSize: 34, fontWeight: 700, color: softAmber, lineHeight: 1 }}>{pct}<span style={{ fontSize: 18, fontWeight: 500 }}>%</span></span>
+        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", marginTop: 4, fontWeight: 400 }}>Great match!</span>
       </div>
     </div>
   );
@@ -850,7 +856,8 @@ function TestCardContent({ s }: { s: Session }) {
   const friendLine = friends.length > 0
     ? `${friends[0].name} + ${Math.max(1, friends.length - 1)} friends joining`
     : `${s.filled} players joining`;
-  const district = VENUE_DISTRICTS[s.venue] || s.venue;
+  const distance = VENUE_DISTANCE[s.venue] || "3.2 km";
+  const price = SESSION_PRICE[s.id] || "90k · 2h";
   const remaining = Math.max(0, s.filled - 3);
 
   const inRange = ME.dupr >= s.duprRange.min && ME.dupr <= s.duprRange.max;
@@ -863,65 +870,74 @@ function TestCardContent({ s }: { s: Session }) {
   return (
     <div style={{ position: "relative", borderRadius: 28, overflow: "hidden", height: "100%" }}>
       <CardBgRotator />
-      {/* Lighter gradient — image visible top 55%, fading into dark */}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(11,11,12,0.05) 0%, rgba(11,11,12,0.15) 30%, rgba(11,11,12,0.5) 48%, rgba(11,11,12,0.88) 60%, #0B0B0C 75%)", zIndex: 1 }} />
 
-      <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", padding: "16px 20px 22px" }}>
+      {/* Cinematic layered overlays */}
+      {/* Top overlay — darken sky/top gently */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.15) 50%, transparent 60%)", zIndex: 1 }} />
+      {/* Bottom overlay — readable text zone */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.1) 55%, transparent 65%)", zIndex: 1 }} />
+      {/* Warm amber atmospheric tint — subtle */}
+      <div style={{ position: "absolute", inset: 0, background: "rgba(246,185,59,0.04)", zIndex: 1 }} />
+      {/* Subtle vignette */}
+      <div style={{ position: "absolute", inset: 0, boxShadow: "inset 0 0 80px 20px rgba(0,0,0,0.35)", zIndex: 1, pointerEvents: "none" }} />
 
-        {/* Top row: Tonight + time + location */}
+      <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", padding: "18px 22px 24px" }}>
+
+        {/* Top row: Tonight + time ... distance (right) */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "auto" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(245,166,35,0.18)", backdropFilter: "blur(12px)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: 20, padding: "5px 14px", fontSize: 12, fontWeight: 600, color: A }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(246,185,59,0.12)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(246,185,59,0.18)", borderRadius: 20, padding: "5px 14px", fontSize: 12, fontWeight: 600, color: A }}>
             <Clock size={12} strokeWidth={2} />
             Tonight
           </span>
-          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.6)" }}>{s.time}</span>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, color: "rgba(255,255,255,0.6)" }}>
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.65)" }}>{s.time}</span>
+          <span style={{ flex: 1 }} />
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, color: "rgba(255,255,255,0.65)" }}>
             <MapPin size={12} strokeWidth={1.5} />
-            {district}
+            {distance}
           </span>
         </div>
 
-        {/* Title block — overlaid on the image */}
-        <h2 style={{ fontSize: 34, fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: "0 0 6px", maxWidth: "70%", textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>{s.name}</h2>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 0 }}>
-          <Layers size={13} color="rgba(255,255,255,0.5)" strokeWidth={1.5} />
-          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{s.court}</span>
+        {/* Title block — overlaid on image with text-shadow blur behind */}
+        <h2 style={{ fontSize: 34, fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: "0 0 8px", maxWidth: "70%", textShadow: "0 2px 20px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.3)" }}>{s.name}</h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+          <Layers size={13} color="rgba(255,255,255,0.55)" strokeWidth={1.5} />
+          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>{price}</span>
         </div>
 
-        {/* Match badge — overlaps the image/content boundary */}
-        <div style={{ marginTop: -10, marginBottom: 16, position: "relative", zIndex: 3 }}>
+        {/* Match badge — overlaps image/content boundary */}
+        <div style={{ marginTop: 4, marginBottom: 20, position: "relative", zIndex: 3 }}>
           <MatchBadge pct={s.matchScore} />
         </div>
 
         {/* Social proof — 3 avatars + "+N" */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
           <div style={{ display: "flex" }}>
             {allAvatars.map((p, i) => (
               <PhotoAvatar key={p.avatar} initials={p.avatar} size={34} fallbackBg="#333"
-                style={{ border: "2px solid #0B0B0C", marginLeft: i > 0 ? -10 : 0, position: "relative", zIndex: 6 - i }} />
+                style={{ border: "2px solid rgba(11,11,12,0.8)", marginLeft: i > 0 ? -10 : 0, position: "relative", zIndex: 6 - i }} />
             ))}
             {remaining > 0 && (
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "2px solid #0B0B0C", marginLeft: -10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.5)", position: "relative", zIndex: 0 }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "2px solid rgba(11,11,12,0.8)", marginLeft: -10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.45)", position: "relative", zIndex: 0, backdropFilter: "blur(8px)" }}>
                 +{remaining}
               </div>
             )}
           </div>
           <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>
-            {friendLine} <Heart size={12} fill={A} color={A} strokeWidth={0} style={{ display: "inline", verticalAlign: "-1px" }} />
+            {friendLine} <Heart size={12} fill="rgba(220,170,60,0.8)" color="rgba(220,170,60,0.8)" strokeWidth={0} style={{ display: "inline", verticalAlign: "-1px" }} />
           </span>
         </div>
 
-        {/* Tags — no border, subtle bg, SVG icons */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
+        {/* Tags */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 22 }}>
           {vibeTags.map((t, i) => (
-            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(245,166,35,0.08)", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 500, color: A, border: "none" }}>
+            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(246,185,59,0.06)", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 500, color: "rgba(220,170,60,0.9)", border: "none" }}>
               {t.icon} {t.label}
             </span>
           ))}
         </div>
 
-        {/* CTA — text left-center, arrow far right */}
-        <button style={{ width: "100%", background: A, border: "none", borderRadius: 18, padding: "16px 20px", cursor: "pointer", fontFamily: "inherit", fontSize: 17, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 4px 28px rgba(245,166,35,0.3)" }}>
+        {/* CTA — with ambient glow */}
+        <button style={{ position: "relative", width: "100%", background: A, border: "none", borderRadius: 18, padding: "16px 20px", cursor: "pointer", fontFamily: "inherit", fontSize: 17, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 0 40px rgba(245,166,35,0.2), 0 4px 20px rgba(245,166,35,0.25)" }}>
           <span style={{ flex: 1, textAlign: "center" }}>I'm In</span>
           <ArrowRight size={20} strokeWidth={2.5} />
         </button>
@@ -1094,7 +1110,7 @@ function TestScreen() {
             <RotateCcw size={18} color="#888" strokeWidth={2} />
           </button>
           <button onClick={() => triggerExit("join")} disabled={isExiting}
-            style={{ width: 64, height: 64, borderRadius: "50%", background: A, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.5 : 1, boxShadow: "0 4px 24px rgba(245,166,35,0.35)" }}>
+            style={{ width: 64, height: 64, borderRadius: "50%", background: A, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: isExiting ? "default" : "pointer", opacity: isExiting ? 0.5 : 1, boxShadow: "0 0 36px rgba(245,166,35,0.25), 0 4px 16px rgba(245,166,35,0.3)" }}>
             <Heart size={28} color="#0B0B0C" fill="#0B0B0C" strokeWidth={2} />
           </button>
         </div>
