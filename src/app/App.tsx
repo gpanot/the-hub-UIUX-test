@@ -71,7 +71,7 @@ type Session     = { id: number; name: string; venue: string; court: string; tim
 type ConcernId   = "friends" | "swiperight" | "wait" | "level" | "vibe";
 type FilterId    = "all" | "fast" | "level" | "friends";
 type SwipeAction = "join" | "skip";
-type TabId       = "swipe" | "saved" | "scene" | "test" | "testsaved" | "test2";
+type TabId       = "swipe" | "saved" | "scene" | "test" | "testsaved" | "test2" | "test2saved";
 type AroundMeTab = "hotspots" | "circle";
 
 /* ── Data ──────────────────────────────────────────────────── */
@@ -514,6 +514,7 @@ function BottomNav({ active, onSelect, savedCount }: { active: TabId; onSelect: 
     { id: "test",  icon: <Sparkles size={18} strokeWidth={1.5} />, label: "Happening" },
     { id: "test2", icon: <Zap size={18} strokeWidth={1.5} />, label: "Test2" },
     { id: "testsaved", icon: <Heart size={18} strokeWidth={1.5} />, label: "Shortlist" },
+    { id: "test2saved", icon: <Bookmark size={18} strokeWidth={1.5} />, label: "Shortlist2" },
   ];
   return (
     <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "#0a0a0a", borderTop: "0.5px solid #1e1e1e", display: "flex", zIndex: 200, paddingBottom: "env(safe-area-inset-bottom, 0px)", height: "calc(64px + env(safe-area-inset-bottom, 0px))" }}>
@@ -1263,7 +1264,7 @@ function MatchDialCorner({ pct }: { pct: number }) {
   );
 }
 
-function Test2CardContent({ s, onJoin }: { s: Session; onJoin?: () => void }) {
+function Test2CardContent({ s, onJoin, renderCta }: { s: Session; onJoin?: () => void; renderCta?: React.ReactNode }) {
   const distance = VENUE_DISTANCE[s.venue] || "3.2 km";
   const price = SESSION_PRICE[s.id] || "90k · 2h";
   const displayPlayers = s.players.slice(0, 4);
@@ -1360,14 +1361,16 @@ function Test2CardContent({ s, onJoin }: { s: Session; onJoin?: () => void }) {
               </div>
             </div>
 
-            <button type="button" onClick={onJoin} style={{
-              width: "100%", background: A, border: "none", borderRadius: 14, padding: "11px 12px", cursor: "pointer", fontFamily: "inherit",
-              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
-              boxShadow: "0 0 32px rgba(245,166,35,0.2)",
-            }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: "#1a0a00" }}>Shortlist · {spotsLeft} spots left</span>
-              <span style={{ fontSize: 11, color: "rgba(0,0,0,0.5)" }}>{s.filled} / {s.totalSpots} filled</span>
-            </button>
+            {renderCta || (
+              <button type="button" onClick={onJoin} style={{
+                width: "100%", background: A, border: "none", borderRadius: 14, padding: "11px 12px", cursor: "pointer", fontFamily: "inherit",
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
+                boxShadow: "0 0 32px rgba(245,166,35,0.2)",
+              }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: "#1a0a00" }}>Shortlist · {spotsLeft} spots left</span>
+                <span style={{ fontSize: 11, color: "rgba(0,0,0,0.5)" }}>{s.filled} / {s.totalSpots} filled</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -1639,6 +1642,87 @@ function TestSavedScreen({ sessions }: { sessions: Session[] }) {
   );
 }
 
+/* ── Test2 Saved Screen ────────────────────────────────────── */
+function Test2CarouselCard({ s, onRemove }: { s: Session; onRemove?: () => void }) {
+  const savedCta = (
+    <div style={{ display: "flex", gap: 8, width: "100%" }}>
+      <a href="https://reclub.co/m/3CUP8A" target="_blank" rel="noopener noreferrer" style={{ flex: 1, textDecoration: "none" }}>
+        <div style={{ width: "100%", background: A, borderRadius: 14, padding: "12px 0", fontSize: 15, fontWeight: 700, color: "#0B0B0C", textAlign: "center", boxShadow: "0 0 40px rgba(245,166,35,0.2), 0 4px 20px rgba(245,166,35,0.25)" }}>Join on Reclub</div>
+      </a>
+      {onRemove && (
+        <button onClick={onRemove}
+          style={{ width: 48, flexShrink: 0, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+          <X size={16} color="rgba(255,255,255,0.4)" strokeWidth={2} />
+        </button>
+      )}
+    </div>
+  );
+
+  return (
+    <div style={{ width: "84vw", maxWidth: 360, flexShrink: 0, scrollSnapAlign: "start", display: "flex", flexDirection: "column", height: "100%" }}>
+      <Test2CardContent s={s} renderCta={savedCta} />
+    </div>
+  );
+}
+
+function Test2SavedScreen({ sessions }: { sessions: Session[] }) {
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const [sort, setSort] = useState<"match" | "wait" | "friends">("match");
+  const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
+  const [showOverlay, setShowOverlay] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const visibleSessions = sessions.filter(s => !removedIds.has(s.id));
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const approxCard = scrollRef.current.offsetWidth * 0.84 + 10;
+    setCarouselIdx(Math.min(Math.round(scrollRef.current.scrollLeft / approxCard), visibleSessions.length - 1));
+  };
+  const handleRemove = (id: number) => setRemovedIds(prev => new Set([...prev, id]));
+
+  const SORT_LABELS: Record<string, string> = { match: "Best match", wait: "Wait time", friends: "Friends" };
+
+  return (
+    <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", height: "calc(100dvh - 64px)" }}>
+      <TopBar title="Your shortlist" onAvatarTap={() => setShowOverlay(true)} />
+      {showOverlay && <OverlaySettingsSheet onClose={() => setShowOverlay(false)} />}
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexShrink: 0 }}>
+        {(["match", "wait", "friends"] as const).map(s2 => {
+          const on = sort === s2;
+          return (
+            <button key={s2} onClick={() => setSort(s2)}
+              style={{ padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: on ? 600 : 400, cursor: "pointer", fontFamily: "inherit",
+                background: on ? A : IN, color: on ? "#000" : MU,
+                border: `1px solid ${on ? A : BD}` }}>
+              {SORT_LABELS[s2]}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <div ref={scrollRef} onScroll={handleScroll}
+          style={{ flex: 1, display: "flex", gap: 12, marginLeft: -16, paddingLeft: 16, marginRight: -16, paddingRight: 16, overflowX: "auto", scrollSnapType: "x mandatory", scrollbarWidth: "none", alignItems: "stretch" } as React.CSSProperties}>
+          {visibleSessions.length > 0 ? visibleSessions.map(sess => (
+            <Test2CarouselCard key={sess.id} s={sess} onRemove={() => handleRemove(sess.id)} />
+          )) : (
+            <div style={{ padding: "48px 0", color: "rgba(255,255,255,0.3)", fontSize: 13 }}>No saved sessions yet.</div>
+          )}
+        </div>
+
+        {visibleSessions.length > 1 && (
+          <div style={{ display: "flex", justifyContent: "center", gap: 6, padding: "12px 0", flexShrink: 0 }}>
+            {visibleSessions.map((_, i) => (
+              <div key={i} style={{ height: 5, width: i === carouselIdx ? 14 : 5, borderRadius: 3, background: i === carouselIdx ? A : "rgba(255,255,255,0.1)", transition: "all 0.2s" }} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Filter config ─────────────────────────────────────────── */
 const FILTERS: { id: FilterId; label: string; icon?: React.ReactNode }[] = [
   { id: "all",     label: "All" },
@@ -1830,6 +1914,9 @@ export default function App() {
 
         {/* ── TEST SAVED TAB ── */}
         {activeTab === "testsaved" && <TestSavedScreen sessions={savedSessions} />}
+
+        {/* ── TEST2 SAVED TAB ── */}
+        {activeTab === "test2saved" && <Test2SavedScreen sessions={savedSessions} />}
 
       {/* Bottom nav */}
       <BottomNav active={activeTab} onSelect={setActiveTab} savedCount={savedCount} />
