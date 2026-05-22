@@ -851,7 +851,7 @@ function MatchBadge({ pct }: { pct: number }) {
   );
 }
 
-function TestCardContent({ s, onShortlist }: { s: Session; onShortlist?: () => void }) {
+function TestCardContent({ s, onShortlist, renderCta }: { s: Session; onShortlist?: () => void; renderCta?: React.ReactNode }) {
   const friends = s.players.filter(p => p.isFriend);
   const allAvatars = s.players.slice(0, 3);
   const friendLine = friends.length > 0
@@ -898,9 +898,9 @@ function TestCardContent({ s, onShortlist }: { s: Session; onShortlist?: () => v
           </span>
         </div>
 
-        {/* Title block — fluid sizing, 2 lines max */}
-        <h2 style={{ fontSize: "clamp(24px, 6vw, 32px)", fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: "0 0 6px", width: "100%", textShadow: "0 2px 20px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.3)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-          {s.name}
+        {/* Title block — first word line 1, rest line 2, 75% width */}
+        <h2 style={{ fontSize: "clamp(24px, 6vw, 32px)", fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: "0 0 6px", maxWidth: "75%", textShadow: "0 2px 20px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.3)" }}>
+          {s.name.split(" ")[0]}<br /><span style={{ display: "inline-block", maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name.split(" ").slice(1).join(" ")}</span>
         </h2>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, width: "100%" }}>
           <Layers size={12} color="rgba(255,255,255,0.55)" strokeWidth={1.5} />
@@ -942,10 +942,12 @@ function TestCardContent({ s, onShortlist }: { s: Session; onShortlist?: () => v
         </div>
 
         {/* CTA — full width, fluid */}
-        <button onClick={onShortlist} style={{ width: "100%", background: A, border: "none", borderRadius: 18, padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", fontSize: 16, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 0 40px rgba(245,166,35,0.2), 0 4px 20px rgba(245,166,35,0.25)" }}>
-          <span style={{ flex: 1, textAlign: "center" }}>Shortlist</span>
-          <ArrowRight size={18} strokeWidth={2.5} />
-        </button>
+        {renderCta || (
+          <button onClick={onShortlist} style={{ width: "100%", background: A, border: "none", borderRadius: 18, padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", fontSize: 16, fontWeight: 700, color: "#0B0B0C", letterSpacing: "0.01em", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 0 40px rgba(245,166,35,0.2), 0 4px 20px rgba(245,166,35,0.25)" }}>
+            <span style={{ flex: 1, textAlign: "center" }}>Shortlist</span>
+            <ArrowRight size={18} strokeWidth={2.5} />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -1161,84 +1163,24 @@ function TestScreen() {
 }
 
 /* ── Test Saved Screen ─────────────────────────────────────── */
-function TestCarouselCard({ s, isBestMatch, onRemove }: { s: Session; isBestMatch?: boolean; onRemove?: () => void }) {
-  const friends = s.players.filter(p => p.isFriend);
-  const allAvatars = s.players.slice(0, 3);
-  const friendLine = friends.length > 0
-    ? `${friends[0].name} +${Math.max(1, friends.length - 1)} friends`
-    : `${s.filled} players`;
-  const distance = VENUE_DISTANCE[s.venue] || "3.2 km";
-  const price = SESSION_PRICE[s.id] || "90k · 2h";
-  const remaining = Math.max(0, s.filled - 3);
-  const inRange = ME.dupr >= s.duprRange.min && ME.dupr <= s.duprRange.max;
-
-  const vibeTags: { icon: React.ReactNode; label: string }[] = [];
-  if (s.matchScore >= 80) vibeTags.push({ icon: <Flame size={12} strokeWidth={1.8} color={A} />, label: "Popular" });
-  vibeTags.push({ icon: <Target size={12} strokeWidth={1.8} color={A} />, label: inRange ? "Intermediate" : "Competitive" });
-  if (s.vibe === "Social" || s.vibe === "Chill") vibeTags.push({ icon: <Wine size={12} strokeWidth={1.8} color={A} />, label: "Social vibe" });
+function TestCarouselCard({ s, onRemove }: { s: Session; onRemove?: () => void }) {
+  const savedCta = (
+    <div style={{ display: "flex", gap: 8, width: "100%" }}>
+      <a href="https://reclub.co/m/3CUP8A" target="_blank" rel="noopener noreferrer" style={{ flex: 1, textDecoration: "none" }}>
+        <div style={{ width: "100%", background: A, borderRadius: 18, padding: "14px 0", fontSize: 16, fontWeight: 700, color: "#0B0B0C", textAlign: "center", boxShadow: "0 0 40px rgba(245,166,35,0.2), 0 4px 20px rgba(245,166,35,0.25)" }}>Join on Reclub</div>
+      </a>
+      {onRemove && (
+        <button onClick={onRemove}
+          style={{ width: 52, flexShrink: 0, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+          <X size={16} color="rgba(255,255,255,0.4)" strokeWidth={2} />
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <div style={{ width: "84vw", maxWidth: 360, flexShrink: 0, scrollSnapAlign: "start", display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ position: "relative", borderRadius: 24, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)", flex: 1, display: "flex", flexDirection: "column" }}>
-        <CardBgRotator />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.08) 45%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.92) 80%)", zIndex: 1 }} />
-        <div style={{ position: "absolute", inset: 0, background: "rgba(246,185,59,0.04)", zIndex: 1 }} />
-
-        <div style={{ position: "relative", zIndex: 2, flex: 1, display: "flex", flexDirection: "column", padding: "14px 16px 16px", overflow: "hidden" }}>
-          {/* Top pills */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "auto" }}>
-            <span style={{ background: "rgba(246,185,59,0.12)", backdropFilter: "blur(12px)", borderRadius: 16, padding: "3px 10px", fontSize: 10, fontWeight: 600, color: A }}>Tonight</span>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>{s.time}</span>
-            <span style={{ flex: 1 }} />
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>{distance}</span>
-          </div>
-
-          {isBestMatch && (
-            <span style={{ alignSelf: "flex-start", fontSize: 10, fontWeight: 600, color: A, border: `1px solid rgba(245,166,35,0.3)`, borderRadius: 16, padding: "2px 10px", marginBottom: 6 }}>Best Match</span>
-          )}
-
-          {/* Title */}
-          <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", lineHeight: 1.15, marginBottom: 4, textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}>{s.name}</div>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginBottom: 10 }}>{price}</div>
-
-          {/* Match */}
-          <div style={{ fontSize: 22, fontWeight: 700, color: "rgba(220,170,60,0.85)", marginBottom: 10 }}>{s.matchScore}% <span style={{ fontSize: 10, fontWeight: 400, color: "rgba(255,255,255,0.35)" }}>match</span></div>
-
-          {/* Avatars */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-            <div style={{ display: "flex" }}>
-              {allAvatars.map((p, i) => (
-                <PhotoAvatar key={p.avatar} initials={p.avatar} size={28} fallbackBg="#333"
-                  style={{ border: "2px solid rgba(11,11,12,0.8)", marginLeft: i > 0 ? -8 : 0, position: "relative", zIndex: 4 - i }} />
-              ))}
-              {remaining > 0 && (
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "2px solid rgba(11,11,12,0.8)", marginLeft: -8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.4)" }}>+{remaining}</div>
-              )}
-            </div>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{friendLine}</span>
-          </div>
-
-          {/* Tags */}
-          <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-            {vibeTags.map((t, i) => (
-              <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(246,185,59,0.06)", borderRadius: 16, padding: "4px 10px", fontSize: 10, color: "rgba(220,170,60,0.9)" }}>{t.icon} {t.label}</span>
-            ))}
-          </div>
-
-          {/* CTA */}
-          <div style={{ marginTop: "auto", display: "flex", gap: 8 }}>
-            <a href="https://reclub.co/m/3CUP8A" target="_blank" rel="noopener noreferrer" style={{ flex: 1, textDecoration: "none" }}>
-              <div style={{ width: "100%", background: A, borderRadius: 14, padding: "11px 0", fontSize: 13, fontWeight: 700, color: "#0B0B0C", textAlign: "center" }}>I'm In</div>
-            </a>
-            {onRemove && (
-              <button onClick={onRemove}
-                style={{ width: "20%", flexShrink: 0, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                <X size={14} color="rgba(255,255,255,0.4)" strokeWidth={2} />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <TestCardContent s={s} renderCta={savedCta} />
     </div>
   );
 }
