@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 /* ── Overlay opacity context ───────────────────────────────── */
-const OverlayCtx = createContext<{ opacity: number; setOpacity: (v: number) => void }>({ opacity: 0.65, setOpacity: () => {} });
+const OverlayCtx = createContext<{ opacity: number; setOpacity: (v: number) => void }>({ opacity: 0.9, setOpacity: () => {} });
 
 /* ── Tokens ────────────────────────────────────────────────── */
 const A  = "#f5a623";
@@ -279,6 +279,23 @@ function CardBgRotator() {
         <div key={src} style={{ position: "absolute", inset: 0, backgroundImage: `url(${src})`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0, opacity: i === activeImg ? 1 : 0, transition: "opacity 1.2s ease-in-out" }} />
       ))}
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.90)", zIndex: 1 }} />
+    </>
+  );
+}
+
+function TestCardBgRotator() {
+  const { opacity } = useContext(OverlayCtx);
+  const [activeImg, setActiveImg] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setActiveImg(prev => (prev + 1) % CARD_BG_IMAGES.length), 5000);
+    return () => clearInterval(timer);
+  }, []);
+  return (
+    <>
+      {CARD_BG_IMAGES.map((src, i) => (
+        <div key={src} style={{ position: "absolute", inset: 0, backgroundImage: `url(${src})`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0, opacity: i === activeImg ? 1 : 0, transition: "opacity 1.2s ease-in-out" }} />
+      ))}
+      <div style={{ position: "absolute", inset: 0, background: `rgba(0,0,0,${opacity})`, zIndex: 1, transition: "background 0.15s ease" }} />
     </>
   );
 }
@@ -857,7 +874,6 @@ function MatchBadge({ pct }: { pct: number }) {
 }
 
 function TestCardContent({ s, onShortlist, renderCta }: { s: Session; onShortlist?: () => void; renderCta?: React.ReactNode }) {
-  const { opacity: overlayOp } = useContext(OverlayCtx);
   const friends = s.players.filter(p => p.isFriend);
   const allAvatars = s.players.slice(0, 3);
   const friendLine = friends.length > 0
@@ -874,19 +890,12 @@ function TestCardContent({ s, onShortlist, renderCta }: { s: Session; onShortlis
   if (s.vibe === "Social" || s.vibe === "Chill") vibeTags.push({ icon: <Wine size={13} strokeWidth={1.8} color={A} />, label: "Social vibe" });
   else vibeTags.push({ icon: <Zap size={13} strokeWidth={1.8} color={A} />, label: "Intense" });
 
-  const topOp = Math.min(overlayOp * 0.6, 0.5);
-  const botOp = overlayOp;
-  const botMid = Math.max(overlayOp - 0.35, 0.05);
-
   return (
     <div style={{ position: "relative", borderRadius: 28, overflow: "hidden", height: "100%", width: "100%", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 0 0 0.5px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4)" }}>
-      <CardBgRotator />
+      <TestCardBgRotator />
 
-      {/* Cinematic layered overlays — driven by overlay opacity setting */}
-      <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, rgba(0,0,0,${topOp.toFixed(2)}), rgba(0,0,0,${(topOp * 0.25).toFixed(2)}) 50%, transparent 60%)`, zIndex: 1 }} />
-      <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, rgba(0,0,0,${botOp.toFixed(2)}), rgba(0,0,0,${botMid.toFixed(2)}) 40%, rgba(0,0,0,0.05) 55%, transparent 65%)`, zIndex: 1 }} />
-      <div style={{ position: "absolute", inset: 0, background: "rgba(246,185,59,0.04)", zIndex: 1 }} />
-      <div style={{ position: "absolute", inset: 0, boxShadow: "inset 0 0 80px 20px rgba(0,0,0,0.35)", zIndex: 1, pointerEvents: "none" }} />
+      {/* Subtle cinematic tint only — dark shadow controlled by TestCardBgRotator */}
+      <div style={{ position: "absolute", inset: 0, background: "rgba(246,185,59,0.04)", zIndex: 2, pointerEvents: "none" }} />
 
       <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", padding: "16px 16px 20px", width: "100%" }}>
 
@@ -1022,8 +1031,7 @@ function TestSecondaryCard({ s }: { s: Session }) {
   const friends = s.players.filter(p => p.isFriend);
   return (
     <div style={{ position: "relative", borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" }}>
-      <CardBgRotator />
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 1 }} />
+      <TestCardBgRotator />
       <div style={{ position: "relative", zIndex: 2, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 4 }}>{s.name}</div>
@@ -1045,27 +1053,41 @@ function TestSecondaryCard({ s }: { s: Session }) {
   );
 }
 
-/* ── Overlay settings dialog ───────────────────────────────── */
-function OverlaySettingsDialog({ onClose }: { onClose: () => void }) {
+/* ── Overlay settings — bottom sheet, no backdrop dim ────────── */
+function OverlaySettingsSheet({ onClose }: { onClose: () => void }) {
   const { opacity, setOpacity } = useContext(OverlayCtx);
   return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: 20, padding: "24px 24px 28px", width: "min(320px, 85vw)" }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: "#fff", marginBottom: 20 }}>Card overlay</div>
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Dark shadow opacity</span>
-            <span style={{ fontSize: 12, color: A, fontWeight: 600 }}>{Math.round(opacity * 100)}%</span>
-          </div>
-          <input type="range" min={0} max={100} value={Math.round(opacity * 100)}
-            onChange={e => setOpacity(Number(e.target.value) / 100)}
-            style={{ width: "100%", accentColor: A, height: 6, cursor: "pointer" }} />
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.25)" }}>Transparent</span>
-            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.25)" }}>Dark</span>
-          </div>
+    <div style={{ position: "fixed", inset: 0, zIndex: 500, pointerEvents: "none", display: "flex", flexDirection: "column", justifyContent: "flex-end", left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430 }}>
+      <div onClick={onClose} style={{ flex: 1, pointerEvents: "auto" }} />
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          pointerEvents: "auto",
+          background: "rgba(20,20,20,0.92)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          borderTop: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: "20px 20px 0 0",
+          padding: "18px 20px calc(20px + env(safe-area-inset-bottom, 0px))",
+          width: "100%",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Dark shadow</span>
+          <span style={{ fontSize: 13, color: A, fontWeight: 600 }}>{Math.round(opacity * 100)}%</span>
         </div>
-        <button onClick={onClose} style={{ width: "100%", background: A, border: "none", borderRadius: 12, padding: "10px 0", fontSize: 13, fontWeight: 600, color: "#0B0B0C", cursor: "pointer", fontFamily: "inherit", marginTop: 8 }}>Done</button>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={Math.round(opacity * 100)}
+          onChange={e => setOpacity(Number(e.target.value) / 100)}
+          style={{ width: "100%", accentColor: A, height: 6, cursor: "pointer", display: "block" }}
+        />
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>See photo</span>
+          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>Dark</span>
+        </div>
       </div>
     </div>
   );
@@ -1113,7 +1135,7 @@ function TestScreen() {
   return (
     <div style={{ padding: "0 16px" }}>
       <TopBar title="Find your game" onAvatarTap={() => setShowOverlay(true)} />
-      {showOverlay && <OverlaySettingsDialog onClose={() => setShowOverlay(false)} />}
+      {showOverlay && <OverlaySettingsSheet onClose={() => setShowOverlay(false)} />}
 
       {/* Filter pills */}
       <div style={{ display: "flex", gap: 8, marginBottom: 12, width: "100%" }}>
@@ -1239,7 +1261,7 @@ function TestSavedScreen({ sessions }: { sessions: Session[] }) {
   return (
     <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", height: "calc(100dvh - 64px)" }}>
       <TopBar title="Your shortlist" onAvatarTap={() => setShowOverlay(true)} />
-      {showOverlay && <OverlaySettingsDialog onClose={() => setShowOverlay(false)} />}
+      {showOverlay && <OverlaySettingsSheet onClose={() => setShowOverlay(false)} />}
 
       {/* Sort pills */}
       <div style={{ display: "flex", gap: 8, marginBottom: 12, flexShrink: 0 }}>
@@ -1291,7 +1313,7 @@ const FILTERS: { id: FilterId; label: string; icon?: React.ReactNode }[] = [
 /* ── App ───────────────────────────────────────────────────── */
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("swipe");
-  const [overlayOpacity, setOverlayOpacity] = useState(0.65);
+  const [overlayOpacity, setOverlayOpacity] = useState(0.9);
   const savedSessions = ALL_SESSIONS.filter(s => SAVED_IDS.includes(s.id));
 
   // Swipe state
