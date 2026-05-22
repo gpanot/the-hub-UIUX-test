@@ -7,7 +7,7 @@ import {
   ThumbsUp, Zap, Target, Users, Flame,
   Clock, MapPin, X, Check, RotateCcw, RefreshCw,
   Bookmark, Layers, Heart, Sparkles, ArrowRight, Trophy,
-  Star, Wine, Smile, Info, Bolt,
+  Star, Wine, Smile, Bolt,
 } from "lucide-react";
 
 /* ── Overlay opacity context ───────────────────────────────── */
@@ -1316,8 +1316,8 @@ function Test2CardContent({ s, onJoin }: { s: Session; onJoin?: () => void }) {
               <RingedAvatar key={p.avatar} initials={p.avatar} ringColor={RING_COLORS[i % RING_COLORS.length]} />
             ))}
             <div style={{
-              width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.12)",
-              border: "1.5px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center",
+              width: 52, height: 52, borderRadius: "50%", background: "rgba(0,0,0,0.45)",
+              border: "1.5px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 14, fontWeight: 500, color: "#aaa", flexShrink: 0,
             }}>+6</div>
           </div>
@@ -1333,7 +1333,7 @@ function Test2CardContent({ s, onJoin }: { s: Session; onJoin?: () => void }) {
 
           {/* Frosted bottom panel — 12px gap from metadata strip */}
           <div style={{
-            marginTop: 12, background: "rgba(255,255,255,0.06)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+            marginTop: 12, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
             borderRadius: 12, padding: "10px", border: "1px solid rgba(255,255,255,0.08)",
           }}>
             {/* Your regulars block */}
@@ -1356,24 +1356,14 @@ function Test2CardContent({ s, onJoin }: { s: Session; onJoin?: () => void }) {
               </div>
             </div>
 
-            {/* CTA row */}
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <button type="button" onClick={onJoin} style={{
-                flex: 1, background: A, border: "none", borderRadius: 14, padding: "11px 12px", cursor: "pointer", fontFamily: "inherit",
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
-                boxShadow: "0 0 32px rgba(245,166,35,0.2)",
-              }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: "#1a0a00" }}>Shortlist · {spotsLeft} spots left</span>
-                <span style={{ fontSize: 11, color: "rgba(0,0,0,0.5)" }}>{s.filled} / {s.totalSpots} filled</span>
-              </button>
-              <button type="button" style={{
-                width: 52, height: 52, flexShrink: 0, borderRadius: "50%", background: "rgba(255,255,255,0.1)",
-                border: "0.5px solid rgba(255,255,255,0.15)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, cursor: "pointer", fontFamily: "inherit",
-              }}>
-                <Info size={18} color="#aaa" strokeWidth={1.5} />
-                <span style={{ fontSize: 9, color: "#777" }}>Details</span>
-              </button>
-            </div>
+            <button type="button" onClick={onJoin} style={{
+              width: "100%", background: A, border: "none", borderRadius: 14, padding: "11px 12px", cursor: "pointer", fontFamily: "inherit",
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
+              boxShadow: "0 0 32px rgba(245,166,35,0.2)",
+            }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: "#1a0a00" }}>Join · {spotsLeft} spots left</span>
+              <span style={{ fontSize: 11, color: "rgba(0,0,0,0.5)" }}>{s.filled} / {s.totalSpots} filled</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1514,7 +1504,7 @@ function Test2Screen() {
         </div>
       ) : current && (
         <>
-          <div style={{ position: "relative", marginBottom: 12, height: "min(572px, 64vh)", width: "100%" }}>
+          <div style={{ position: "relative", marginBottom: 12, height: "min(601px, 67.2vh)", width: "100%" }}>
             {deck[currentIdx + 2] && (
               <motion.div animate={isExiting ? { opacity: 0.3 } : { opacity: 0.12 }} transition={{ duration: 0.3 }}
                 style={{ position: "absolute", top: 8, left: 12, right: 12, bottom: -4, background: "rgba(30,30,30,0.6)", borderRadius: 28, zIndex: 0, pointerEvents: "none" }} />
